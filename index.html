@@ -132,47 +132,53 @@
       justify-content: space-between;
       align-items: center;
       transition: all 0.2s ease;
+      position: relative;
     }
-    .unit-card:hover {
+    .unit-card:hover:not(.unit-completed) {
       border-color: var(--primary);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
     }
+    .unit-card.unit-completed {
+      background: #F1F5F9;
+      cursor: default;
+      opacity: 0.85;
+      border-color: var(--success);
+    }
     .unit-details h3 { font-size: 16px; margin-bottom: 4px; }
     .unit-details p { font-size: 12px; color: var(--text-muted); }
+    .unit-badge-status {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
     .badge-icon {
-      font-size: 28px;
-      opacity: 0.3;
+      font-size: 26px;
+      opacity: 0.35;
       filter: grayscale(1);
       transition: 0.2s ease;
     }
     .badge-unlocked { opacity: 1; filter: none; }
+    .done-tag {
+      font-size: 11px;
+      font-weight: 800;
+      color: #065F46;
+      background: var(--success-light);
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
 
     /* Question Screen */
-    .mode-selector {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      background: var(--bg);
-      padding: 6px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-    .mode-btn {
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      font-family: 'Fredoka', sans-serif;
-      font-size: 14px;
-      cursor: pointer;
-      background: transparent;
-      color: var(--text-muted);
-      transition: all 0.2s ease;
-    }
-    .mode-btn.active {
-      background: var(--card);
+    .active-mode-indicator {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--primary);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+      background: var(--primary-light);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
     }
 
     .stimulus-box {
@@ -262,7 +268,7 @@
     }
     .secondary-btn:hover { background: var(--bg); color: var(--text); }
 
-    /* Login Modal */
+    /* Modal Overlays */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -278,7 +284,7 @@
       border-radius: var(--radius);
       padding: 28px;
       width: 100%;
-      max-width: 400px;
+      max-width: 440px;
       text-align: center;
     }
     .modal input {
@@ -291,8 +297,36 @@
       text-align: center;
       font-weight: 700;
     }
+    .mode-choice-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--card);
+      text-align: left;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mode-choice-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .mode-choice-title {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+    }
+    .mode-choice-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
     .error-msg { font-size: 12px; color: var(--danger); display: none; }
-    
     .hidden { display: none !important; }
   </style>
 </head>
@@ -306,6 +340,32 @@
       <input type="text" id="studentNameInput" maxlength="15" placeholder="e.g. Rachel Tan" autofocus />
       <p id="nameError" class="error-msg">Name must be 2 to 15 characters long.</p>
       <button class="action-btn" onclick="saveName()">Start Quest</button>
+    </div>
+  </div>
+
+  <!-- Pre-Topic Mode Selector Modal -->
+  <div id="modeSelectModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="modalUnitTitle">Select Challenge Mode</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 6px;">How do you want to tackle this unit?</p>
+      
+      <button class="mode-choice-btn" onclick="confirmMode('mcq')">
+        <div class="mode-choice-title">
+          <span>Mode A: Multiple Choice</span>
+          <span style="color:#D97706;">+10 EXP</span>
+        </div>
+        <div class="mode-choice-desc">Identify the correct sentence from 4 options. Great for building confidence!</div>
+      </button>
+
+      <button class="mode-choice-btn" onclick="confirmMode('type')">
+        <div class="mode-choice-title">
+          <span>Mode B: Full Sentence Typing</span>
+          <span style="color:#D97706;">+25 EXP</span>
+        </div>
+        <div class="mode-choice-desc">Type out the full transformed sentence on your own. Maximum rewards!</div>
+      </button>
+
+      <button class="action-btn secondary-btn" style="margin-top: 12px;" onclick="closeModeModal()">Cancel</button>
     </div>
   </div>
 
@@ -325,7 +385,7 @@
     <!-- Screen 1: Topic Selector -->
     <div id="topicScreen" class="card">
       <h2 style="margin-bottom: 4px;">🎯 Choose a Topic</h2>
-      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Score 80% or higher to unlock each unit badge!</p>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Complete each unit once. Score 80% or higher to unlock the badge!</p>
       
       <div class="unit-grid" id="unitGrid"></div>
 
@@ -334,20 +394,16 @@
 
     <!-- Screen 2: Question View -->
     <div id="questionScreen" class="card hidden">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
         <span id="questionTopicHeading" style="font-weight: 700; font-size: 14px; color: var(--primary);">Unit 1</span>
-        <span id="questionProgress" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Question 1 of 5</span>
+        <span id="questionProgress" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Question 1 of 2</span>
       </div>
 
-      <div class="progress-bar-container" style="margin-bottom: 16px;">
+      <div class="progress-bar-container" style="margin-bottom: 12px;">
         <div id="progressBar" class="progress-bar-fill"></div>
       </div>
 
-      <!-- Mode Selector -->
-      <div class="mode-selector">
-        <button id="modeMcqBtn" class="mode-btn active" onclick="switchMode('mcq')">Mode A: MCQ (+10 EXP)</button>
-        <button id="modeTypeBtn" class="mode-btn" onclick="switchMode('type')">Mode B: Full Typing (+25 EXP)</button>
-      </div>
+      <div id="activeModeBadge" class="active-mode-indicator">Mode A: Multiple Choice</div>
 
       <!-- Question Stimulus -->
       <div class="stimulus-box">
@@ -355,12 +411,12 @@
         <div class="prompt-word" id="promptConnector">Connector: ...</div>
       </div>
 
-      <!-- Mode A UI: MCQ -->
+      <!-- Mode A UI: Shuffled MCQ -->
       <div id="mcqContainer" class="mcq-options"></div>
 
       <!-- Mode B UI: Typing -->
       <div id="typingContainer" class="typing-box hidden">
-        <input type="text" id="typedInput" class="typing-input" placeholder="Type your combined sentence here..." autocomplete="off" />
+        <input type="text" id="typedInput" class="typing-input" placeholder="Type your full synthesized sentence here..." autocomplete="off" />
         <button id="checkTypingBtn" class="action-btn" onclick="checkTypedAnswer()">Submit Answer</button>
       </div>
 
@@ -377,7 +433,7 @@
       <div id="summaryBadgeDisplay" style="font-size: 64px; margin-bottom: 12px;">🎉</div>
       <h2 id="summaryHeading">Unit Complete!</h2>
       <p id="summaryScore" style="color: var(--text-muted); margin: 8px 0 20px 0; font-size: 16px;"></p>
-      <button class="action-btn" onclick="backToTopics()">Pick Another Unit</button>
+      <button class="action-btn" onclick="backToTopics()">Back to Topics</button>
     </div>
   </div>
 
@@ -387,7 +443,9 @@
       name: localStorage.getItem('p5_name') || '',
       exp: parseInt(localStorage.getItem('p5_exp') || '0', 10),
       badges: JSON.parse(localStorage.getItem('p5_badges') || '{}'),
-      apiUrl: localStorage.getItem('p5_api_url') || 'https://script.google.com/macros/s/AKfycbwHZD5Lg8uOMY2d5Z0eusxuzBmp8LdZ8s2eLBDOYfi7Tz9e7YX12AD-OAgKe8KJGHk6/exec',
+      doneQuestions: JSON.parse(localStorage.getItem('p5_done_q') || '{}'),
+      apiUrl: localStorage.getItem('p5_api_url') || '',
+      selectedUnitIdx: null,
       currentUnitIndex: 0,
       currentQuestionIndex: 0,
       currentMode: 'mcq',
@@ -405,13 +463,14 @@
         badgeName: "Number Knight",
         questions: [
           {
+            id: "u1_q1",
             given: "Michael does not like drawing. Stephen does not like drawing either.",
             prompt: "neither ... nor",
             mcqOptions: [
               { text: "Neither Michael nor Stephen likes drawing.", correct: true, feedback: "Correct! The singular verb 'likes' agrees with Stephen (the nearer subject)." },
               { text: "Neither Michael nor Stephen like drawing.", correct: false, feedback: "Watch out! Stephen is singular, so the verb closest to it must be 'likes'." },
               { text: "Neither Michael nor Stephen does not like drawing.", correct: false, feedback: "'Neither' already has a negative meaning. Drop 'does not'!" },
-              { text: "Michael neither nor Stephen likes drawing.", correct: false, feedback: "Keep the correlative pair intact: 'Neither [Subject 1] nor [Subject 2]'." }
+              { text: "Neither Michael nor Stephen dislikes drawing.", correct: false, feedback: "Keep the meaning the same! 'Dislikes' alters the intended structure here." }
             ],
             acceptableAnswers: [
               "Neither Michael nor Stephen likes drawing.",
@@ -419,17 +478,22 @@
             ]
           },
           {
+            id: "u1_q2",
             given: "Both sailing and water skiing are sea sports.",
             prompt: "as well as",
             mcqOptions: [
               { text: "Sailing, as well as water skiing, is a sea sport.", correct: true, feedback: "Well done! The verb 'is' agrees with the primary subject 'Sailing'." },
               { text: "Sailing, as well as water skiing, are sea sports.", correct: false, feedback: "Trap alert! 'As well as water skiing' is parenthetical. The main subject 'Sailing' is singular, so use 'is'." },
-              { text: "Both sailing as well as water skiing are sea sports.", correct: false, feedback: "Remove 'Both' when rewriting with 'as well as'." },
+              { text: "Sailing as well as water skiing is sea sports.", correct: false, feedback: "Number agreement check: 'is' cannot pair with plural 'sports'." },
               { text: "Sailing as well as water skiing were sea sports.", correct: false, feedback: "Do not change present tense 'are' into past tense 'were'." }
             ],
             acceptableAnswers: [
               "Sailing, as well as water skiing, is a sea sport.",
-              "Sailing as well as water skiing is a sea sport."
+              "Sailing as well as water skiing is a sea sport.",
+              "Both sailing as well as water skiing are sea sports.",
+              "Both sailing, as well as water skiing, are sea sports.",
+              "Water skiing, as well as sailing, is a sea sport.",
+              "Water skiing as well as sailing is a sea sport."
             ]
           }
         ]
@@ -442,13 +506,14 @@
         badgeName: "Time Master",
         questions: [
           {
+            id: "u2_q1",
             given: "Kevin washed his hands. Kevin then ate the sandwiches.",
             prompt: "Before",
             mcqOptions: [
               { text: "Before eating the sandwiches, Kevin washed his hands.", correct: true, feedback: "Spot on! 'Ate' changes into the gerund 'eating'." },
-              { text: "Before Kevin washed his hands, he ate the sandwiches.", correct: false, feedback: "Check the order of events! He washed his hands first, not after." },
+              { text: "Before Kevin washed his hands, he ate the sandwiches.", correct: false, feedback: "Check the chronological order! He washed his hands first, not after." },
               { text: "Before ate the sandwiches, Kevin washed his hands.", correct: false, feedback: "After a preposition like 'before', use a gerund ('eating'), not past tense 'ate'." },
-              { text: "Before eating the sandwiches Kevin washed his hands", correct: false, feedback: "Remember the comma after an introductory prepositional clause!" }
+              { text: "Before Kevin eats the sandwiches, he washed his hands.", correct: false, feedback: "Tense mismatch between clauses!" }
             ],
             acceptableAnswers: [
               "Before eating the sandwiches, Kevin washed his hands.",
@@ -458,13 +523,14 @@
             ]
           },
           {
+            id: "u2_q2",
             given: "Mary plays netball still. She started during her primary school days.",
             prompt: "since",
             mcqOptions: [
               { text: "Mary has played netball since her primary school days.", correct: true, feedback: "Superb! 'Since' requires the present perfect tense ('has played')." },
               { text: "Mary played netball since her primary school days.", correct: false, feedback: "She still plays today! Use present perfect 'has played', not simple past 'played'." },
               { text: "Mary plays netball since her primary school days.", correct: false, feedback: "Use 'has played' with 'since' to show an action continuing up to now." },
-              { text: "Since Mary plays netball, she started in primary school.", correct: false, feedback: "'Since' here marks a point in time, not a reason." }
+              { text: "Since primary school, Mary was playing netball.", correct: false, feedback: "Past continuous does not convey ongoing habit up to present." }
             ],
             acceptableAnswers: [
               "Mary has played netball since her primary school days.",
@@ -481,13 +547,14 @@
         badgeName: "Contrast Captain",
         questions: [
           {
+            id: "u3_q1",
             given: "Daniel cycled for half a day. He did not feel tired.",
             prompt: "Although",
             mcqOptions: [
               { text: "Although Daniel cycled for half a day, he did not feel tired.", correct: true, feedback: "Excellent! No 'but' is needed because 'Although' already links the clauses." },
               { text: "Although Daniel cycled for half a day, but he did not feel tired.", correct: false, feedback: "Trap alert! Never pair 'although' with 'but' in the same sentence." },
-              { text: "Although Daniel did not feel tired, he cycled for half a day.", correct: false, feedback: "Check the logic! The surprising result is that he did not feel tired after cycling." },
-              { text: "Although cycling for half a day, Daniel does not feel tired.", correct: false, feedback: "Keep the past tense 'did not feel', do not change to present tense 'does not'." }
+              { text: "Although Daniel did not feel tired, he cycled for half a day.", correct: false, feedback: "Check the logic! The surprising outcome is not feeling tired." },
+              { text: "Daniel cycled for half a day although he felt tired.", correct: false, feedback: "Contradicts the original sentence (he did not feel tired)." }
             ],
             acceptableAnswers: [
               "Although Daniel cycled for half a day, he did not feel tired.",
@@ -495,6 +562,7 @@
             ]
           },
           {
+            id: "u3_q2",
             given: "He trained hard. He did not win the Olympic race.",
             prompt: "Despite",
             mcqOptions: [
@@ -520,13 +588,14 @@
         badgeName: "Purpose Pilot",
         questions: [
           {
+            id: "u4_q1",
             given: "Jia Wei ran to the bus stop. He did not want to be late.",
             prompt: "so that",
             mcqOptions: [
               { text: "Jia Wei ran to the bus stop so that he would not be late.", correct: true, feedback: "Spot on! The modal 'would' correctly matches the past tense 'ran'." },
               { text: "Jia Wei ran to the bus stop so that he will not be late.", correct: false, feedback: "Tense mismatch! 'Ran' is past tense, so use past modal 'would', not 'will'." },
               { text: "Jia Wei ran to the bus stop so that not to be late.", correct: false, feedback: "'So that' must be followed by a subject and verb clause ('he would not be...')." },
-              { text: "Jia Wei ran to the bus stop so that he does not want to be late.", correct: false, feedback: "Remove 'does not want to' when expressing purpose with 'so that'." }
+              { text: "Jia Wei ran to the bus stop so that he would be late.", correct: false, feedback: "Opposite meaning! He ran so that he would NOT be late." }
             ],
             acceptableAnswers: [
               "Jia Wei ran to the bus stop so that he would not be late.",
@@ -543,13 +612,14 @@
         badgeName: "Reason Ranger",
         questions: [
           {
+            id: "u5_q1",
             given: "She was dehydrated, so she had a severe headache.",
             prompt: "Because of",
             mcqOptions: [
               { text: "Because of dehydration, she had a severe headache.", correct: true, feedback: "Great word transformation! Adjective 'dehydrated' converts into the noun 'dehydration'." },
               { text: "Because of she was dehydrated, she had a severe headache.", correct: false, feedback: "'Because of' requires a noun phrase, not a subject + verb clause." },
               { text: "Because of being dehydrated, so she had a severe headache.", correct: false, feedback: "Drop 'so' when starting with 'Because of'!" },
-              { text: "Because of dehydration she had a severe headache", correct: false, feedback: "Don't forget the comma after the introductory phrase!" }
+              { text: "Because of dehydrating, she had a severe headache.", correct: false, feedback: "'Dehydrating' implies an active process rather than state of dehydration." }
             ],
             acceptableAnswers: [
               "Because of dehydration, she had a severe headache.",
@@ -569,13 +639,14 @@
         badgeName: "Condition Champion",
         questions: [
           {
+            id: "u6_q1",
             given: "You had better leave now. Otherwise, you will not catch the bus.",
             prompt: "Unless",
             mcqOptions: [
               { text: "Unless you leave now, you will not catch the bus.", correct: true, feedback: "Correct! 'Unless' means 'If you do not'." },
-              { text: "Unless you do not leave now, you will not catch the bus.", correct: false, feedback: "Double negative error! Never put 'not' immediately inside the 'unless' clause." },
+              { text: "Unless you do not leave now, you will not catch the bus.", correct: false, feedback: "Double negative trap! Never put 'not' immediately inside the 'unless' clause." },
               { text: "Unless you leave now, you will catch the bus.", correct: false, feedback: "Meaning reversed! If you do not leave now, you miss it." },
-              { text: "Unless leaving now, you will not catch the bus.", correct: false, feedback: "Use a complete clause after 'Unless': 'Unless you leave now'." }
+              { text: "Unless you left now, you will not catch the bus.", correct: false, feedback: "Tense mismatch between condition and result." }
             ],
             acceptableAnswers: [
               "Unless you leave now, you will not catch the bus.",
@@ -592,13 +663,14 @@
         badgeName: "Emphasis Expert",
         questions: [
           {
+            id: "u7_q1",
             given: "The drummer played extremely loudly. I was almost deafened.",
             prompt: "So loudly",
             mcqOptions: [
               { text: "So loudly did the drummer play that I was almost deafened.", correct: true, feedback: "Masterful inversion! 'Did' comes before subject 'the drummer', and 'play' is base form." },
               { text: "So loudly the drummer played that I was almost deafened.", correct: false, feedback: "Inversion needed! Starting with 'So loudly' requires helping verb 'did' before the subject." },
               { text: "So loudly did the drummer played that I was almost deafened.", correct: false, feedback: "Trap alert! After auxiliary 'did', the main verb must be base form 'play', not 'played'." },
-              { text: "So loudly was the drummer playing that I was almost deafened.", correct: false, feedback: "Keep the simple past aspect: use 'did the drummer play'." }
+              { text: "So loudly does the drummer play that I was almost deafened.", correct: false, feedback: "Tense clash! 'Does' is present tense, but the original event happened in the past." }
             ],
             acceptableAnswers: [
               "So loudly did the drummer play that I was almost deafened."
@@ -614,6 +686,7 @@
         badgeName: "Preference Pro",
         questions: [
           {
+            id: "u8_q1",
             given: "Leon likes to waterski. He likes to sail even more.",
             prompt: "prefers",
             mcqOptions: [
@@ -636,13 +709,14 @@
         badgeName: "People Pioneer",
         questions: [
           {
+            id: "u9_q1",
             given: "The zookeeper was attacked by the tiger. He was very experienced.",
             prompt: "whom",
             mcqOptions: [
               { text: "The zookeeper whom the tiger attacked was very experienced.", correct: true, feedback: "Well done! 'Whom' refers to the object receiving the action (attacked by the tiger)." },
-              { text: "The zookeeper who the tiger attacked was very experienced.", correct: false, feedback: "In formal synthesis testing, use 'whom' when followed by a new subject ('the tiger')." },
               { text: "The zookeeper whom was attacked by the tiger was very experienced.", correct: false, feedback: "'Whom' cannot act as the subject of 'was attacked'." },
-              { text: "The zookeeper, whom the tiger attacked was very experienced.", correct: false, feedback: "Punctuation error! Use either a pair of commas or no commas at all." }
+              { text: "The zookeeper whom attacked the tiger was very experienced.", correct: false, feedback: "Reversed agent! The tiger attacked the zookeeper, not vice versa." },
+              { text: "The zookeeper whom the tiger attacked him was very experienced.", correct: false, feedback: "Redundancy error: drop 'him' because 'whom' already replaces it." }
             ],
             acceptableAnswers: [
               "The zookeeper whom the tiger attacked was very experienced.",
@@ -659,13 +733,14 @@
         badgeName: "Place Tracker",
         questions: [
           {
+            id: "u10_q1",
             given: "That is the shop. I get good bargains at that shop.",
             prompt: "where",
             mcqOptions: [
               { text: "That is the shop where I get good bargains.", correct: true, feedback: "Spot on! Drop 'at that shop' because 'where' replaces the location phrase." },
               { text: "That is the shop where I get good bargains there.", correct: false, feedback: "Redundancy error! Remove 'there' when 'where' is used." },
               { text: "That is the shop which I get good bargains.", correct: false, feedback: "'Shop' is a place where an action happens; use 'where' or 'at which'." },
-              { text: "Where I get good bargains, that is the shop.", correct: false, feedback: "Keep the main clause first for natural sentence structure." }
+              { text: "That is the shop where at I get good bargains.", correct: false, feedback: "Do not retain the preposition 'at' after 'where'." }
             ],
             acceptableAnswers: [
               "That is the shop where I get good bargains."
@@ -681,13 +756,14 @@
         badgeName: "Speech Specialist",
         questions: [
           {
+            id: "u11_q1",
             given: "\"Darryl drank up all the milk,\" said Wen Xuan.",
             prompt: "Wen Xuan said that",
             mcqOptions: [
               { text: "Wen Xuan said that Darryl had drunk up all the milk.", correct: true, feedback: "Brilliant! Simple past 'drank' backshifts to past perfect 'had drunk'." },
               { text: "Wen Xuan said that Darryl drank up all the milk.", correct: false, feedback: "Remember the backshift! Simple past 'drank' must change to past perfect 'had drunk'." },
               { text: "Wen Xuan said that Darryl had drank up all the milk.", correct: false, feedback: "Irregular verb check! The past participle of drink is 'drunk' (had drunk), not 'had drank'." },
-              { text: "Wen Xuan told that Darryl had drunk all the milk.", correct: false, feedback: "'Told' needs a person receiver (e.g., 'told me'). Use 'said that' here." }
+              { text: "Wen Xuan told that Darryl had drunk up all the milk.", correct: false, feedback: "'Told' needs a person receiver (e.g., 'told me'). Use 'said that' here." }
             ],
             acceptableAnswers: [
               "Wen Xuan said that Darryl had drunk up all the milk.",
@@ -704,6 +780,7 @@
         badgeName: "Voice Virtuoso",
         questions: [
           {
+            id: "u12_q1",
             given: "The workmen are digging up the roads.",
             prompt: "The roads",
             mcqOptions: [
@@ -726,13 +803,14 @@
         badgeName: "Word Class Wizard",
         questions: [
           {
+            id: "u13_q1",
             given: "Sean suddenly appeared in front of Angela. He gave her a shock.",
             prompt: "Sean's sudden",
             mcqOptions: [
               { text: "Sean's sudden appearance in front of Angela gave her a shock.", correct: true, feedback: "Excellent! Verb 'appeared' transforms smoothly into the noun 'appearance'." },
               { text: "Sean's sudden appear in front of Angela gave her a shock.", correct: false, feedback: "'Appear' is a verb. After adjective 'sudden', use noun 'appearance'." },
               { text: "Sean's sudden appearing in front of Angela gave her a shock.", correct: false, feedback: "Use the standard abstract noun 'appearance' rather than participle 'appearing'." },
-              { text: "Sean's sudden appearance, gave Angela a shock.", correct: false, feedback: "Do not separate the subject from its verb with an unnecessary comma." }
+              { text: "Sean's sudden appearance gives Angela a shock.", correct: false, feedback: "Tense clash: original past tense 'gave' must not turn into 'gives'." }
             ],
             acceptableAnswers: [
               "Sean's sudden appearance in front of Angela gave her a shock."
@@ -748,13 +826,14 @@
         badgeName: "Phrase Pathfinder",
         questions: [
           {
+            id: "u14_q1",
             given: "Vindy felt elated. She danced around the room.",
             prompt: "Feeling elated,",
             mcqOptions: [
               { text: "Feeling elated, Vindy danced around the room.", correct: true, feedback: "Spot on! The present participle 'Feeling' cleanly opens the descriptive clause." },
               { text: "Feeling elated, so Vindy danced around the room.", correct: false, feedback: "Do not add 'so'! The participial phrase directly modifies 'Vindy'." },
-              { text: "Feeling elated Vindy danced around the room.", correct: false, feedback: "Missing comma! Always place a comma after an introductory participial phrase." },
-              { text: "Felt elated, Vindy danced around the room.", correct: false, feedback: "Active emotion requires the present participle 'Feeling', not 'Felt'." }
+              { text: "Felt elated, Vindy danced around the room.", correct: false, feedback: "Active emotion requires the present participle 'Feeling', not 'Felt'." },
+              { text: "Feeling elated, Vindy dances around the room.", correct: false, feedback: "Tense shift error: keep simple past 'danced'." }
             ],
             acceptableAnswers: [
               "Feeling elated, Vindy danced around the room."
@@ -764,7 +843,7 @@
       }
     ];
 
-    // --- LEVEL SYSTEM ---
+    // --- LEVEL SCALING ---
     const levels = [
       { minExp: 0, title: "Level 1: Novice" },
       { minExp: 100, title: "Level 2: Apprentice" },
@@ -778,6 +857,16 @@
         if (exp >= levels[i].minExp) return levels[i].title;
       }
       return levels[0].title;
+    }
+
+    // --- UTILITIES: SHUFFLE ---
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
     }
 
     // --- INITIALISATION ---
@@ -809,33 +898,74 @@
       document.getElementById('levelTitle').innerText = getLevel(state.exp);
     }
 
+    function isUnitFullyCompleted(unit) {
+      return unit.questions.every(q => state.doneQuestions[q.id]);
+    }
+
     function renderTopicGrid() {
       const grid = document.getElementById('unitGrid');
       grid.innerHTML = '';
       curriculum.forEach((unit, idx) => {
         const isMastered = !!state.badges[unit.unitId];
+        const isCompleted = isUnitFullyCompleted(unit);
+
         const card = document.createElement('div');
-        card.className = 'unit-card';
-        card.onclick = () => startUnit(idx);
+        card.className = `unit-card ${isCompleted ? 'unit-completed' : ''}`;
+        
+        card.onclick = () => {
+          if (isCompleted) {
+            alert(`You have already completed ${unit.title}! Great job. Try another unit.`);
+            return;
+          }
+          openModeModal(idx);
+        };
+
         card.innerHTML = `
           <div class="unit-details">
             <h3>${unit.title}</h3>
             <p>${unit.connector}</p>
           </div>
-          <div class="badge-icon ${isMastered ? 'badge-unlocked' : ''}" title="${unit.badgeName}">
-            ${unit.badge}
+          <div class="unit-badge-status">
+            <div class="badge-icon ${isMastered ? 'badge-unlocked' : ''}" title="${unit.badgeName}">
+              ${unit.badge}
+            </div>
+            ${isCompleted ? '<span class="done-tag">✓ Done</span>' : ''}
           </div>
         `;
         grid.appendChild(card);
       });
     }
 
-    // --- GAMEPLAY CONTROLLER ---
+    // --- PRE-TOPIC MODE MODAL ---
+    function openModeModal(unitIdx) {
+      state.selectedUnitIdx = unitIdx;
+      const unit = curriculum[unitIdx];
+      document.getElementById('modalUnitTitle').innerText = unit.title;
+      document.getElementById('modeSelectModal').classList.remove('hidden');
+    }
+
+    function closeModeModal() {
+      state.selectedUnitIdx = null;
+      document.getElementById('modeSelectModal').classList.add('hidden');
+    }
+
+    function confirmMode(chosenMode) {
+      state.currentMode = chosenMode;
+      const unitIdx = state.selectedUnitIdx;
+      closeModeModal();
+      startUnit(unitIdx);
+    }
+
+    // --- GAMEPLAY FLOW ---
     function startUnit(unitIdx) {
       state.currentUnitIndex = unitIdx;
-      state.currentQuestionIndex = 0;
       state.currentUnitCorrect = 0;
-      state.currentMode = 'mcq';
+
+      // Find first uncompleted question
+      const unit = curriculum[unitIdx];
+      let firstUnsolved = unit.questions.findIndex(q => !state.doneQuestions[q.id]);
+      if (firstUnsolved === -1) firstUnsolved = 0;
+      state.currentQuestionIndex = firstUnsolved;
 
       document.getElementById('topicScreen').classList.add('hidden');
       document.getElementById('summaryScreen').classList.add('hidden');
@@ -855,63 +985,60 @@
       const pct = (state.currentQuestionIndex / unit.questions.length) * 100;
       document.getElementById('progressBar').style.width = `${pct}%`;
 
+      // Mode Badge
+      const modeBadge = document.getElementById('activeModeBadge');
+      if (state.currentMode === 'mcq') {
+        modeBadge.innerText = 'Mode A: Multiple Choice (+10 EXP)';
+        document.getElementById('mcqContainer').classList.remove('hidden');
+        document.getElementById('typingContainer').classList.add('hidden');
+        renderShuffledMcq(q);
+      } else {
+        modeBadge.innerText = 'Mode B: Full Sentence Typing (+25 EXP)';
+        document.getElementById('typingContainer').classList.remove('hidden');
+        document.getElementById('mcqContainer').classList.add('hidden');
+        setupTypingMode();
+      }
+
       // Stimulus
       document.getElementById('givenSentences').innerText = q.given;
       document.getElementById('promptConnector').innerText = `Use: ${q.prompt}`;
 
-      // Reset feedback and next button
+      // Reset feedback and controls
       const fb = document.getElementById('feedbackBanner');
       fb.style.display = 'none';
       fb.className = 'feedback-banner';
       document.getElementById('nextBtn').classList.add('hidden');
-
-      // Setup Modes
-      renderMcqMode(q);
-      setupTypingMode();
-      switchMode(state.currentMode);
     }
 
-    function switchMode(mode) {
-      state.currentMode = mode;
-      const mcqBtn = document.getElementById('modeMcqBtn');
-      const typeBtn = document.getElementById('modeTypeBtn');
-      const mcqContainer = document.getElementById('mcqContainer');
-      const typingContainer = document.getElementById('typingContainer');
-
-      if (mode === 'mcq') {
-        mcqBtn.classList.add('active');
-        typeBtn.classList.remove('active');
-        mcqContainer.classList.remove('hidden');
-        typingContainer.classList.add('hidden');
-      } else {
-        typeBtn.classList.add('active');
-        mcqBtn.classList.remove('active');
-        typingContainer.classList.remove('hidden');
-        mcqContainer.classList.add('hidden');
-        document.getElementById('typedInput').focus();
-      }
-    }
-
-    // --- MODE A: MCQ ---
-    function renderMcqMode(q) {
+    // --- MODE A: SHUFFLED MCQ ---
+    function renderShuffledMcq(q) {
       const container = document.getElementById('mcqContainer');
       container.innerHTML = '';
-      q.mcqOptions.forEach((opt, idx) => {
+      
+      // Randomise options so correct is never always first
+      const randomizedOptions = shuffleArray(q.mcqOptions);
+
+      randomizedOptions.forEach((opt) => {
         const btn = document.createElement('button');
         btn.className = 'mcq-btn';
         btn.innerText = opt.text;
-        btn.onclick = () => selectMcqOption(idx, opt, btn);
+        btn.onclick = () => selectMcqOption(opt, btn);
         container.appendChild(btn);
       });
     }
 
-    function selectMcqOption(idx, option, btnElement) {
-      // Disable all options
-      const allBtns = document.querySelectorAll('.mcq-btn');
-      allBtns.forEach(b => b.disabled = true);
+    function selectMcqOption(option, btnElement) {
+      const q = curriculum[state.currentUnitIndex].questions[state.currentQuestionIndex];
+
+      // Lock all options
+      document.querySelectorAll('.mcq-btn').forEach(b => b.disabled = true);
 
       const fb = document.getElementById('feedbackBanner');
       fb.style.display = 'block';
+
+      // Permanently flag question as done
+      state.doneQuestions[q.id] = true;
+      localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
 
       if (option.correct) {
         btnElement.classList.add('correct');
@@ -933,6 +1060,7 @@
       input.value = '';
       input.disabled = false;
       document.getElementById('checkTypingBtn').disabled = false;
+      input.focus();
     }
 
     function normaliseSentence(str) {
@@ -956,15 +1084,16 @@
         return;
       }
 
-      // Exact match test against preloaded variations
+      // Check against all acceptable answers
       const isExactMatch = q.acceptableAnswers.some(ans => normaliseSentence(ans).toLowerCase() === userText.toLowerCase());
-
-      // Punctuation check
       const endsWithPunctuation = /[.?!]$/.test(userText);
       const startsWithCapital = /^[A-Z]/.test(userText);
 
       if (isExactMatch && endsWithPunctuation && startsWithCapital) {
-        // Full Score
+        // Mark question as done
+        state.doneQuestions[q.id] = true;
+        localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
+
         input.disabled = true;
         document.getElementById('checkTypingBtn').disabled = true;
         fb.className = 'feedback-banner feedback-success';
@@ -974,24 +1103,30 @@
         document.getElementById('nextBtn').classList.remove('hidden');
       } 
       else if (isExactMatch && (!endsWithPunctuation || !startsWithCapital)) {
-        // Scaffolding: Minor mechanical oversight (give second chance)
+        // Scaffolding: Minor mechanical oversight (1 free retry)
         if (!state.typingRetryUsed) {
           state.typingRetryUsed = true;
           fb.className = 'feedback-banner feedback-scaffold';
           fb.innerHTML = `<strong>🔍 Almost there!</strong> Your grammar structure is spot on, but check your capital letter or final full stop. Fix it and try once more!`;
         } else {
-          // Accepted with warning if already retried
+          // Accepted after retry
+          state.doneQuestions[q.id] = true;
+          localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
+
           input.disabled = true;
           document.getElementById('checkTypingBtn').disabled = true;
           fb.className = 'feedback-banner feedback-success';
-          fb.innerHTML = `<strong>Accepted! (+20 EXP)</strong> Good effort! Remember your full stop in exam conditions.`;
+          fb.innerHTML = `<strong>Accepted! (+20 EXP)</strong> Good effort! Remember your full stop under exam conditions.`;
           awardExp(20, 'Typing Mode');
           state.currentUnitCorrect++;
           document.getElementById('nextBtn').classList.remove('hidden');
         }
       } 
       else {
-        // Does not match
+        // Incorrect
+        state.doneQuestions[q.id] = true;
+        localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
+
         fb.className = 'feedback-banner feedback-error';
         fb.innerHTML = `<strong>Not quite right:</strong> Check connectors and verbs carefully.<br><em>Model Answer:</em> ${q.acceptableAnswers[0]}`;
         input.disabled = true;
@@ -1000,13 +1135,12 @@
       }
     }
 
-    // --- EXP, PROGRESSION & BACKGROUND SYNC ---
+    // --- EXP & BACKGROUND GOOGLE SHEET SYNC ---
     function awardExp(points, modeStr) {
       state.exp += points;
       localStorage.setItem('p5_exp', state.exp);
       updateUserUI();
 
-      // Silent background log to Google Sheet (Zero Classroom Lag)
       if (state.apiUrl) {
         const payload = JSON.stringify({
           name: state.name,
@@ -1059,7 +1193,7 @@
 
       document.getElementById('summaryScore').innerText = 
         `You scored ${state.currentUnitCorrect} / ${unit.questions.length} (${Math.round(accuracy * 100)}%).` +
-        (isMastered ? " Mastery demonstrated!" : " Reach 80% to earn the badge.");
+        (isMastered ? " Mastery demonstrated!" : " Score 80% or more to earn the badge.");
 
       renderTopicGrid();
     }
@@ -1073,7 +1207,7 @@
 
     function configureApiUrl() {
       const current = state.apiUrl || '';
-      const input = prompt("Paste your Google Apps Script Web App URL here (from Part 1):", current);
+      const input = prompt("https://script.google.com/macros/s/AKfycbwHZD5Lg8uOMY2d5Z0eusxuzBmp8LdZ8s2eLBDOYfi7Tz9e7YX12AD-OAgKe8KJGHk6/exec", current);
       if (input !== null) {
         state.apiUrl = input.trim();
         localStorage.setItem('p5_api_url', state.apiUrl);
