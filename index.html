@@ -17,6 +17,8 @@
       --warning-light: #FEF3C7;
       --danger: #EF4444;
       --danger-light: #FEE2E2;
+      --purple: #7C3AED;
+      --purple-light: #F3E8FF;
       --bg: #F8FAFC;
       --card: #FFFFFF;
       --text: #1E293B;
@@ -41,7 +43,7 @@
 
     .app-container {
       width: 100%;
-      max-width: 680px;
+      max-width: 720px;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -57,13 +59,14 @@
       align-items: center;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       border: 1px solid var(--border);
+      user-select: none;
     }
-    .user-info { display: flex; align-items: center; gap: 12px; }
+    .user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .avatar {
       background: var(--primary-light);
       color: var(--primary);
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -82,9 +85,23 @@
       border-radius: 12px;
       width: fit-content;
     }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .mistakes-btn {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--danger);
+      background: var(--danger-light);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .mistakes-btn:hover { background: #FECACA; }
     .exp-pill {
       font-family: 'Fredoka', sans-serif;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 600;
       color: #D97706;
       background: var(--warning-light);
@@ -119,7 +136,7 @@
     /* Unit Grid */
     .unit-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 12px;
     }
     .unit-card {
@@ -132,9 +149,8 @@
       justify-content: space-between;
       align-items: center;
       transition: all 0.2s ease;
-      position: relative;
     }
-    .unit-card:hover:not(.unit-completed) {
+    .unit-card:hover:not(.unit-completed):not(.unit-locked) {
       border-color: var(--primary);
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
@@ -142,8 +158,19 @@
     .unit-card.unit-completed {
       background: #F1F5F9;
       cursor: default;
-      opacity: 0.85;
+      opacity: 0.88;
       border-color: var(--success);
+    }
+    .unit-card.boss-card {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, #EEF2FF 0%, #F3E8FF 100%);
+      border-color: var(--purple);
+    }
+    .unit-card.unit-locked {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+      cursor: not-allowed;
+      opacity: 0.7;
     }
     .unit-details h3 { font-size: 16px; margin-bottom: 4px; }
     .unit-details p { font-size: 12px; color: var(--text-muted); }
@@ -155,9 +182,8 @@
     }
     .badge-icon {
       font-size: 26px;
-      opacity: 0.35;
+      opacity: 0.3;
       filter: grayscale(1);
-      transition: 0.2s ease;
     }
     .badge-unlocked { opacity: 1; filter: none; }
     .done-tag {
@@ -178,24 +204,27 @@
       background: var(--primary-light);
       padding: 4px 12px;
       border-radius: 20px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .stimulus-box {
       background: var(--primary-light);
       border-left: 4px solid var(--primary);
-      padding: 14px 18px;
-      border-radius: 8px;
+      padding: 16px 18px;
+      border-radius: 10px;
       margin-bottom: 16px;
       font-size: 16px;
       line-height: 1.5;
     }
-    .prompt-word {
+    .psle-stem {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--card);
+      border-radius: 8px;
+      border: 1px dashed #6366F1;
       font-family: 'Fredoka', sans-serif;
-      color: #3730A3;
-      font-weight: 700;
-      margin-top: 6px;
-      display: block;
+      font-size: 15px;
+      color: #312E81;
     }
 
     /* MCQ Options */
@@ -232,6 +261,25 @@
     }
     .typing-input:focus { border-color: var(--primary); }
 
+    /* Diff Highlighting */
+    .diff-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #FFFBEB;
+      border-radius: 8px;
+      font-size: 15px;
+      border: 1px solid #FDE68A;
+    }
+    .word-ok { color: #065F46; font-weight: 700; }
+    .word-err {
+      background: #FEE2E2;
+      color: #991B1B;
+      padding: 1px 5px;
+      border-radius: 4px;
+      text-decoration: underline wavy #EF4444;
+      font-weight: 800;
+    }
+
     /* Feedback Banner */
     .feedback-banner {
       display: none;
@@ -239,7 +287,7 @@
       border-radius: 12px;
       margin-top: 16px;
       font-size: 14px;
-      line-height: 1.4;
+      line-height: 1.5;
     }
     .feedback-success { background: var(--success-light); color: #065F46; border: 1px solid var(--success); }
     .feedback-scaffold { background: var(--warning-light); color: #92400E; border: 1px solid var(--warning); }
@@ -268,11 +316,11 @@
     }
     .secondary-btn:hover { background: var(--bg); color: var(--text); }
 
-    /* Modal Overlays */
+    /* Modals */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.65);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -282,10 +330,12 @@
     .modal {
       background: var(--card);
       border-radius: var(--radius);
-      padding: 28px;
+      padding: 26px;
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       text-align: center;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .modal input {
       width: 100%;
@@ -293,13 +343,24 @@
       font-size: 16px;
       border: 2px solid var(--border);
       border-radius: 10px;
-      margin: 16px 0;
+      margin: 14px 0;
       text-align: center;
       font-weight: 700;
     }
+    .watch-it-box {
+      background: #FEF3C7;
+      border-left: 4px solid #F59E0B;
+      padding: 12px 14px;
+      border-radius: 8px;
+      text-align: left;
+      margin: 14px 0;
+      font-size: 14px;
+      color: #92400E;
+      line-height: 1.45;
+    }
     .mode-choice-btn {
       width: 100%;
-      padding: 16px;
+      padding: 14px 16px;
       border-radius: 12px;
       border: 2px solid var(--border);
       background: var(--card);
@@ -322,9 +383,18 @@
       display: flex;
       justify-content: space-between;
     }
-    .mode-choice-desc {
-      font-size: 13px;
-      color: var(--text-muted);
+    .mode-choice-desc { font-size: 13px; color: var(--text-muted); }
+
+    /* Mistakes List */
+    .mistake-item {
+      text-align: left;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      background: #FAFAFA;
+      font-size: 14px;
+      line-height: 1.45;
     }
     .error-msg { font-size: 12px; color: var(--danger); display: none; }
     .hidden { display: none !important; }
@@ -333,7 +403,7 @@
 <body>
 
   <!-- Login Modal -->
-  <div id="loginModal" class="modal-overlay">
+  <div id="loginModal" class="modal-overlay hidden">
     <div class="modal">
       <h2>👋 Welcome, Challenger!</h2>
       <p style="color: var(--text-muted); margin-top: 6px;">Enter your name to join the classroom quest.</p>
@@ -343,60 +413,83 @@
     </div>
   </div>
 
-  <!-- Pre-Topic Mode Selector Modal -->
+  <!-- Pre-Topic Watch It! + Mode Selector Modal -->
   <div id="modeSelectModal" class="modal-overlay hidden">
     <div class="modal">
-      <h2 id="modalUnitTitle">Select Challenge Mode</h2>
-      <p style="color: var(--text-muted); font-size: 14px; margin-top: 6px;">How do you want to tackle this unit?</p>
+      <h2 id="modalUnitTitle">Unit 1</h2>
+      <div id="watchItTipBox" class="watch-it-box"></div>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 4px;">Choose your challenge mode for this unit:</p>
       
       <button class="mode-choice-btn" onclick="confirmMode('mcq')">
         <div class="mode-choice-title">
           <span>Mode A: Multiple Choice</span>
-          <span style="color:#D97706;">+10 EXP</span>
+          <span id="mcqExpLabel" style="color:#D97706;">+10 EXP / Qn</span>
         </div>
-        <div class="mode-choice-desc">Identify the correct sentence from 4 options. Great for building confidence!</div>
+        <div class="mode-choice-desc">Spot the correct transformation out of 4 choices.</div>
       </button>
 
       <button class="mode-choice-btn" onclick="confirmMode('type')">
         <div class="mode-choice-title">
           <span>Mode B: Full Sentence Typing</span>
-          <span style="color:#D97706;">+25 EXP</span>
+          <span id="typeExpLabel" style="color:#D97706;">+25 EXP / Qn</span>
         </div>
-        <div class="mode-choice-desc">Type out the full transformed sentence on your own. Maximum rewards!</div>
+        <div class="mode-choice-desc">Type the complete sentence yourself with smart error hints!</div>
       </button>
 
       <button class="action-btn secondary-btn" style="margin-top: 12px;" onclick="closeModeModal()">Cancel</button>
     </div>
   </div>
 
+  <!-- Mistakes Review Modal -->
+  <div id="mistakesModal" class="modal-overlay hidden">
+    <div class="modal" style="max-width: 580px;">
+      <h2>📓 My Mistake Log</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0 14px 0;">Review your past slips to master every rule!</p>
+      <div id="mistakesListContainer"></div>
+      <button class="action-btn" onclick="closeMistakesModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- Teacher Admin Modal (Passcode 1998) -->
+  <div id="teacherModal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>🛠️ Teacher Control Panel</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Update Google Sheet URL or reset this device for the next class.</p>
+      <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:13px;" />
+      <button class="action-btn" onclick="saveTeacherApi()">Save Google Sheet Link</button>
+      <button class="action-btn" style="background: var(--danger); margin-top: 10px;" onclick="resetStudentDevice()">🗑️ Reset Student Progress on This Device</button>
+      <button class="action-btn secondary-btn" onclick="closeTeacherModal()">Cancel</button>
+    </div>
+  </div>
+
   <div class="app-container">
-    <!-- Top Header & Level Bar -->
+    <!-- Top Header & Level Bar (Double-click user-info for Teacher Menu) -->
     <div class="top-bar">
-      <div class="user-info">
+      <div class="user-info" ondblclick="promptTeacherPasscode()" title="Double-click for Teacher Menu">
         <div class="avatar" id="avatarLetter">?</div>
         <div class="user-stats">
           <span class="user-name" id="displayStudentName">Pupil</span>
           <span class="level-badge" id="levelTitle">Level 1: Novice</span>
         </div>
       </div>
-      <div class="exp-pill">⭐ <span id="currentExp">0</span> EXP</div>
+      <div class="top-actions">
+        <button class="mistakes-btn" onclick="openMistakesModal()">📓 Mistakes (<span id="mistakeCount">0</span>)</button>
+        <div class="exp-pill">⭐ <span id="currentExp">0</span> EXP</div>
+      </div>
     </div>
 
     <!-- Screen 1: Topic Selector -->
     <div id="topicScreen" class="card">
       <h2 style="margin-bottom: 4px;">🎯 Choose a Topic</h2>
-      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Complete each unit once. Score 80% or higher to unlock the badge!</p>
-      
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 16px;">Score at least 80% (4/5) to unlock each unit's Mastery Badge! Unlock 5 badges to challenge the Boss Rush.</p>
       <div class="unit-grid" id="unitGrid"></div>
-
-      <button class="action-btn secondary-btn" style="margin-top: 20px;" onclick="configureApiUrl()">⚙️ Teacher Settings (Google Sheet Link)</button>
     </div>
 
     <!-- Screen 2: Question View -->
     <div id="questionScreen" class="card hidden">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
         <span id="questionTopicHeading" style="font-weight: 700; font-size: 14px; color: var(--primary);">Unit 1</span>
-        <span id="questionProgress" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Question 1 of 2</span>
+        <span id="questionProgress" style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Question 1 of 5</span>
       </div>
 
       <div class="progress-bar-container" style="margin-bottom: 12px;">
@@ -405,10 +498,10 @@
 
       <div id="activeModeBadge" class="active-mode-indicator">Mode A: Multiple Choice</div>
 
-      <!-- Question Stimulus -->
+      <!-- Question Stimulus & PSLE Exam Line Preview -->
       <div class="stimulus-box">
         <div id="givenSentences">Loading question...</div>
-        <div class="prompt-word" id="promptConnector">Connector: ...</div>
+        <div class="psle-stem" id="psleStemPreview">...</div>
       </div>
 
       <!-- Mode A UI: Shuffled MCQ -->
@@ -425,7 +518,7 @@
 
       <!-- Next Button -->
       <button id="nextBtn" class="action-btn hidden" onclick="nextQuestion()">Continue ➔</button>
-      <button class="action-btn secondary-btn" onclick="backToTopics()">Quit to Topics</button>
+      <button class="action-btn secondary-btn" onclick="quitUnitEarly()">Save & Return to Topics</button>
     </div>
 
     <!-- Screen 3: Unit Completed -->
@@ -438,54 +531,59 @@
   </div>
 
   <script>
+    // =========================================================================
+    // TEACHER CONFIGURATION: PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BELOW
+    // =========================================================================
+    const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbwHZD5Lg8uOMY2d5Z0eusxuzBmp8LdZ8s2eLBDOYfi7Tz9e7YX12AD-OAgKe8KJGHk6/exec';
+
     // --- APP STATE & STORAGE ---
     let state = {
       name: localStorage.getItem('p5_name') || '',
       exp: parseInt(localStorage.getItem('p5_exp') || '0', 10),
       badges: JSON.parse(localStorage.getItem('p5_badges') || '{}'),
       doneQuestions: JSON.parse(localStorage.getItem('p5_done_q') || '{}'),
-      apiUrl: localStorage.getItem('p5_api_url') || '',
+      mistakes: JSON.parse(localStorage.getItem('p5_mistakes') || '[]'),
+      apiUrl: localStorage.getItem('p5_api_url') || (DEFAULT_API_URL !== 'PASTE_YOUR_GOOGLE_SCRIPT_URL_HERE' ? DEFAULT_API_URL : ''),
       selectedUnitIdx: null,
-      currentUnitIndex: 0,
+      currentUnitObj: null,
       currentQuestionIndex: 0,
       currentMode: 'mcq',
       currentUnitCorrect: 0,
+      pendingUnitExp: 0,
       typingRetryUsed: false
     };
 
-    // --- CURRICULUM DATABASE: ALL 14 UNITS PRELOADED ---
+    // --- CURRICULUM DATABASE: 14 UNITS (5 QUESTIONS EACH = 70 QUESTIONS) ---
     const curriculum = [
       {
         unitId: 1,
         title: "Unit 1: Number",
-        connector: "neither... nor / as well as",
+        connector: "neither...nor / as well as / not only",
         badge: "🛡️",
         badgeName: "Number Knight",
+        watchIt: "💡 Watch It! With 'neither... nor' and 'either... or', the verb agrees with the nearer subject. With 'as well as' or 'together with', the verb agrees with the FIRST subject!",
         questions: [
           {
             id: "u1_q1",
             given: "Michael does not like drawing. Stephen does not like drawing either.",
-            prompt: "neither ... nor",
+            stem: "Neither ___________________________ nor ___________________________.",
             mcqOptions: [
-              { text: "Neither Michael nor Stephen likes drawing.", correct: true, feedback: "Correct! The singular verb 'likes' agrees with Stephen (the nearer subject)." },
-              { text: "Neither Michael nor Stephen like drawing.", correct: false, feedback: "Watch out! Stephen is singular, so the verb closest to it must be 'likes'." },
-              { text: "Neither Michael nor Stephen does not like drawing.", correct: false, feedback: "'Neither' already has a negative meaning. Drop 'does not'!" },
-              { text: "Neither Michael nor Stephen dislikes drawing.", correct: false, feedback: "Keep the meaning the same! 'Dislikes' alters the intended structure here." }
+              { text: "Neither Michael nor Stephen likes drawing.", correct: true, feedback: "Spot on! Singular subject 'Stephen' takes singular verb 'likes'." },
+              { text: "Neither Michael nor Stephen like drawing.", correct: false, feedback: "Check the verb! 'Stephen' is singular, so use 'likes'." },
+              { text: "Neither Michael nor Stephen does not like drawing.", correct: false, feedback: "'Neither' is already negative. Remove 'does not'!" },
+              { text: "Neither Michael or Stephen likes drawing.", correct: false, feedback: "Pair 'Neither' with 'nor', not 'or'." }
             ],
-            acceptableAnswers: [
-              "Neither Michael nor Stephen likes drawing.",
-              "Neither Stephen nor Michael likes drawing."
-            ]
+            acceptableAnswers: ["Neither Michael nor Stephen likes drawing.", "Neither Stephen nor Michael likes drawing."]
           },
           {
             id: "u1_q2",
             given: "Both sailing and water skiing are sea sports.",
-            prompt: "as well as",
+            stem: "___________________________ as well as ___________________________.",
             mcqOptions: [
-              { text: "Sailing, as well as water skiing, is a sea sport.", correct: true, feedback: "Well done! The verb 'is' agrees with the primary subject 'Sailing'." },
-              { text: "Sailing, as well as water skiing, are sea sports.", correct: false, feedback: "Trap alert! 'As well as water skiing' is parenthetical. The main subject 'Sailing' is singular, so use 'is'." },
-              { text: "Sailing as well as water skiing is sea sports.", correct: false, feedback: "Number agreement check: 'is' cannot pair with plural 'sports'." },
-              { text: "Sailing as well as water skiing were sea sports.", correct: false, feedback: "Do not change present tense 'are' into past tense 'were'." }
+              { text: "Sailing, as well as water skiing, is a sea sport.", correct: true, feedback: "Well done! The singular subject 'Sailing' takes the singular verb 'is'." },
+              { text: "Sailing, as well as water skiing, are sea sports.", correct: false, feedback: "'As well as water skiing' is extra info. 'Sailing' is singular, so use 'is a sea sport'." },
+              { text: "Sailing as well as water skiing is sea sports.", correct: false, feedback: "Singular 'is' must be followed by 'a sea sport', not plural 'sea sports'." },
+              { text: "Sailing as well as water skiing were sea sports.", correct: false, feedback: "Keep the present tense! Do not change 'are' to 'were'." }
             ],
             acceptableAnswers: [
               "Sailing, as well as water skiing, is a sea sport.",
@@ -495,87 +593,210 @@
               "Water skiing, as well as sailing, is a sea sport.",
               "Water skiing as well as sailing is a sea sport."
             ]
+          },
+          {
+            id: "u1_q3",
+            given: "Chris won the marathon. He also broke the record.",
+            stem: "Not only ___________________________, but ___________________________.",
+            mcqOptions: [
+              { text: "Not only did Chris win the marathon, but he also broke the record.", correct: true, feedback: "Masterful! Starting with 'Not only' requires 'did Chris win' (base verb)." },
+              { text: "Not only did Chris won the marathon, but he also broke the record.", correct: false, feedback: "Trap alert! After 'did', change 'won' back to base form 'win'." },
+              { text: "Not only Chris won the marathon, but he also broke the record.", correct: false, feedback: "When 'Not only' starts the sentence, invert the verb: 'Not only did Chris win...'." },
+              { text: "Not only does Chris win the marathon, but he also broke the record.", correct: false, feedback: "'Won' is past tense, so use 'did', not 'does'." }
+            ],
+            acceptableAnswers: [
+              "Not only did Chris win the marathon, but he also broke the record.",
+              "Not only did Chris win the marathon, but he broke the record as well."
+            ]
+          },
+          {
+            id: "u1_q4",
+            given: "Laura is going to the market. Her parents are accompanying her.",
+            stem: "Together with ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Together with her parents, Laura is going to the market.", correct: true, feedback: "Great job! The main subject is 'Laura' (singular), so the verb is 'is'." },
+              { text: "Together with her parents, Laura are going to the market.", correct: false, feedback: "The main subject is 'Laura', so use singular verb 'is', not 'are'." },
+              { text: "Together with Laura, her parents is going to the market.", correct: false, feedback: "If 'her parents' is the main subject, the verb would have to be 'are'." },
+              { text: "Together with her parents, Laura was going to the market.", correct: false, feedback: "Do not change present tense 'is' to past tense 'was'." }
+            ],
+            acceptableAnswers: [
+              "Together with her parents, Laura is going to the market.",
+              "Together with Laura, her parents are going to the market."
+            ]
+          },
+          {
+            id: "u1_q5",
+            given: "The soldiers charged at the enemy. The soldiers were not fearful.",
+            stem: "___________________________ without ___________________________.",
+            mcqOptions: [
+              { text: "The soldiers charged at the enemy without fear.", correct: true, feedback: "Awesome! 'Were not fearful' transforms cleanly into 'without fear'." },
+              { text: "The soldiers charged at the enemy without not being fearful.", correct: false, feedback: "'Without' is already negative. Never use 'not' after 'without'!" },
+              { text: "The soldiers charged at the enemy without fearful.", correct: false, feedback: "Use a noun ('fear') or gerund phrase ('being fearful') after 'without', not an adjective." },
+              { text: "The soldiers charged at the enemy without feared.", correct: false, feedback: "After preposition 'without', use noun 'fear' or 'being fearful'." }
+            ],
+            acceptableAnswers: [
+              "The soldiers charged at the enemy without fear.",
+              "The soldiers charged at the enemy without being fearful."
+            ]
           }
         ]
       },
       {
         unitId: 2,
         title: "Unit 2: Time",
-        connector: "before / after / since / until",
+        connector: "before / after / since / until / as soon as",
         badge: "⏳",
         badgeName: "Time Master",
+        watchIt: "💡 Watch It! Only use a gerund (-ing) after 'before' or 'after' if BOTH sentences share the same subject. Use Present Perfect ('has/have + participle') with 'since'!",
         questions: [
           {
             id: "u2_q1",
             given: "Kevin washed his hands. Kevin then ate the sandwiches.",
-            prompt: "Before",
+            stem: "Before ___________________________, ___________________________.",
             mcqOptions: [
               { text: "Before eating the sandwiches, Kevin washed his hands.", correct: true, feedback: "Spot on! 'Ate' changes into the gerund 'eating'." },
-              { text: "Before Kevin washed his hands, he ate the sandwiches.", correct: false, feedback: "Check the chronological order! He washed his hands first, not after." },
-              { text: "Before ate the sandwiches, Kevin washed his hands.", correct: false, feedback: "After a preposition like 'before', use a gerund ('eating'), not past tense 'ate'." },
-              { text: "Before Kevin eats the sandwiches, he washed his hands.", correct: false, feedback: "Tense mismatch between clauses!" }
+              { text: "Before Kevin washed his hands, he ate the sandwiches.", correct: false, feedback: "Sequence error! He washed his hands first, then ate." },
+              { text: "Before ate the sandwiches, Kevin washed his hands.", correct: false, feedback: "After 'Before', use a gerund ('eating') or full clause ('Before he ate')." },
+              { text: "Before eating the sandwiches, Kevin then washed his hands.", correct: false, feedback: "Drop the word 'then' when combining with 'Before'!" }
             ],
             acceptableAnswers: [
               "Before eating the sandwiches, Kevin washed his hands.",
               "Before he ate the sandwiches, Kevin washed his hands.",
-              "Kevin washed his hands before eating the sandwiches.",
-              "Kevin washed his hands before he ate the sandwiches."
+              "Before Kevin ate the sandwiches, he washed his hands."
             ]
           },
           {
             id: "u2_q2",
             given: "Mary plays netball still. She started during her primary school days.",
-            prompt: "since",
+            stem: "___________________________ since ___________________________.",
             mcqOptions: [
-              { text: "Mary has played netball since her primary school days.", correct: true, feedback: "Superb! 'Since' requires the present perfect tense ('has played')." },
-              { text: "Mary played netball since her primary school days.", correct: false, feedback: "She still plays today! Use present perfect 'has played', not simple past 'played'." },
-              { text: "Mary plays netball since her primary school days.", correct: false, feedback: "Use 'has played' with 'since' to show an action continuing up to now." },
-              { text: "Since primary school, Mary was playing netball.", correct: false, feedback: "Past continuous does not convey ongoing habit up to present." }
+              { text: "Mary has played netball since her primary school days.", correct: true, feedback: "Superb! 'Since' takes the present perfect tense ('has played')." },
+              { text: "Mary played netball since her primary school days.", correct: false, feedback: "Because she still plays now, use 'has played', not simple past 'played'." },
+              { text: "Mary plays netball since her primary school days.", correct: false, feedback: "Use present perfect 'has played' with 'since'." },
+              { text: "Mary has played netball still since her primary school days.", correct: false, feedback: "Leave out the word 'still' when using 'has played... since'." }
             ],
             acceptableAnswers: [
               "Mary has played netball since her primary school days.",
               "Mary has been playing netball since her primary school days."
             ]
+          },
+          {
+            id: "u2_q3",
+            given: "When he comes home, I will go to sleep.",
+            stem: "Until ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Until he comes home, I will not go to sleep.", correct: true, feedback: "Brilliant! Adding 'not' preserves the original meaning." },
+              { text: "Until he comes home, I will go to sleep.", correct: false, feedback: "Meaning changed! You must wait until he comes home before sleeping ('will not go')." },
+              { text: "Until he came home, I will not go to sleep.", correct: false, feedback: "Keep the present tense 'comes', do not change to 'came'." },
+              { text: "Until when he comes home, I will not go to sleep.", correct: false, feedback: "Drop 'when'—'Until' replaces it." }
+            ],
+            acceptableAnswers: ["Until he comes home, I will not go to sleep."]
+          },
+          {
+            id: "u2_q4",
+            given: "The burglars took to their heels. They did this immediately after they saw the policemen.",
+            stem: "As soon as ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "As soon as the burglars saw the policemen, they took to their heels.", correct: true, feedback: "Great work! 'Immediately after' is replaced cleanly by 'As soon as'." },
+              { text: "As soon as the burglars took to their heels, they saw the policemen.", correct: false, feedback: "Wrong order! They saw the policemen first, then ran." },
+              { text: "As soon as the burglars saw the policemen, they immediately took to their heels.", correct: false, feedback: "Remove 'immediately' because 'As soon as' already means immediately!" },
+              { text: "As soon as seeing the policemen, the burglars took to their heels.", correct: false, feedback: "'As soon as' should be followed by a subject and verb ('the burglars saw')." }
+            ],
+            acceptableAnswers: [
+              "As soon as the burglars saw the policemen, they took to their heels.",
+              "As soon as they saw the policemen, the burglars took to their heels."
+            ]
+          },
+          {
+            id: "u2_q5",
+            given: "He feels tired in the afternoon. Every time he feels like that, he takes a nap.",
+            stem: "Whenever ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Whenever he feels tired in the afternoon, he takes a nap.", correct: true, feedback: "Perfect! 'Every time he feels like that' is replaced by 'Whenever'." },
+              { text: "Whenever he feels tired in the afternoon, every time he takes a nap.", correct: false, feedback: "Leave out 'every time' when using 'Whenever'!" },
+              { text: "Whenever he felt tired in the afternoon, he takes a nap.", correct: false, feedback: "Keep the verb tense consistent in simple present ('feels')." },
+              { text: "Whenever he takes a nap, he feels tired in the afternoon.", correct: false, feedback: "Reversed cause and effect! Feeling tired happens first." }
+            ],
+            acceptableAnswers: ["Whenever he feels tired in the afternoon, he takes a nap."]
           }
         ]
       },
       {
         unitId: 3,
         title: "Unit 3: Contrast",
-        connector: "although / despite / in spite of",
+        connector: "although / despite / in spite of / unlike / except",
         badge: "⚖️",
         badgeName: "Contrast Captain",
+        watchIt: "💡 Watch It! NEVER use 'but' in the same sentence as 'although', 'though', or 'even though'. After 'despite' or 'in spite of', always use a noun phrase or gerund (-ing)!",
         questions: [
           {
             id: "u3_q1",
             given: "Daniel cycled for half a day. He did not feel tired.",
-            prompt: "Although",
+            stem: "Although ___________________________, ___________________________.",
             mcqOptions: [
-              { text: "Although Daniel cycled for half a day, he did not feel tired.", correct: true, feedback: "Excellent! No 'but' is needed because 'Although' already links the clauses." },
-              { text: "Although Daniel cycled for half a day, but he did not feel tired.", correct: false, feedback: "Trap alert! Never pair 'although' with 'but' in the same sentence." },
-              { text: "Although Daniel did not feel tired, he cycled for half a day.", correct: false, feedback: "Check the logic! The surprising outcome is not feeling tired." },
-              { text: "Daniel cycled for half a day although he felt tired.", correct: false, feedback: "Contradicts the original sentence (he did not feel tired)." }
+              { text: "Although Daniel cycled for half a day, he did not feel tired.", correct: true, feedback: "Excellent! No 'but' is needed." },
+              { text: "Although Daniel cycled for half a day, but he did not feel tired.", correct: false, feedback: "Trap alert! Never use 'but' together with 'Although'." },
+              { text: "Although Daniel did not feel tired, he cycled for half a day.", correct: false, feedback: "Put the contrasting condition ('cycled for half a day') right after 'Although'." },
+              { text: "Although cycling for half a day, Daniel did not feel tired.", correct: false, feedback: "Follow 'Although' with a subject + verb ('Although Daniel cycled...')." }
             ],
-            acceptableAnswers: [
-              "Although Daniel cycled for half a day, he did not feel tired.",
-              "Daniel did not feel tired although he cycled for half a day."
-            ]
+            acceptableAnswers: ["Although Daniel cycled for half a day, he did not feel tired."]
           },
           {
             id: "u3_q2",
-            given: "He trained hard. He did not win the Olympic race.",
-            prompt: "Despite",
+            given: "He trained hard. He did not win the race in the Olympics.",
+            stem: "Despite ___________________________, ___________________________.",
             mcqOptions: [
-              { text: "Despite training hard, he did not win the Olympic race.", correct: true, feedback: "Perfect! 'Trained' turns into the gerund 'training' after 'Despite'." },
-              { text: "Despite of training hard, he did not win the Olympic race.", correct: false, feedback: "Never say 'Despite of'! It is either 'Despite' or 'In spite of'." },
-              { text: "Despite he trained hard, he did not win the Olympic race.", correct: false, feedback: "'Despite' must be followed by a noun phrase or gerund, not a full clause." },
-              { text: "Despite training hard, but he did not win the Olympic race.", correct: false, feedback: "Do not include 'but'!" }
+              { text: "Despite training hard, he did not win the race in the Olympics.", correct: true, feedback: "Perfect! 'Trained' turns into the gerund 'training' after 'Despite'." },
+              { text: "Despite of training hard, he did not win the race in the Olympics.", correct: false, feedback: "Never write 'Despite of'! Use 'Despite' or 'In spite of'." },
+              { text: "Despite he trained hard, he did not win the race in the Olympics.", correct: false, feedback: "'Despite' cannot be followed directly by 'he trained'. Use 'training hard'." },
+              { text: "Despite training hard, yet he did not win the race in the Olympics.", correct: false, feedback: "Do not use 'yet' or 'but' with 'Despite'." }
             ],
             acceptableAnswers: [
-              "Despite training hard, he did not win the Olympic race.",
-              "Despite the fact that he trained hard, he did not win the Olympic race.",
-              "He did not win the Olympic race despite training hard.",
-              "He did not win the Olympic race despite the fact that he trained hard."
+              "Despite training hard, he did not win the race in the Olympics.",
+              "Despite the fact that he trained hard, he did not win the race in the Olympics."
+            ]
+          },
+          {
+            id: "u3_q3",
+            given: "Amy bought all the ingredients. She did not buy the flour.",
+            stem: "___________________________ except ___________________________.",
+            mcqOptions: [
+              { text: "Amy bought all the ingredients except the flour.", correct: true, feedback: "Spot on! Drop 'she did not buy' after 'except'." },
+              { text: "Amy bought all the ingredients except she did not buy the flour.", correct: false, feedback: "Use a noun phrase ('the flour') directly after 'except'." },
+              { text: "Amy did not buy all the ingredients except the flour.", correct: false, feedback: "Meaning reversed! She bought everything except the flour." },
+              { text: "Amy bought all the ingredients except buying the flour.", correct: false, feedback: "Simply put the noun phrase 'the flour' after 'except'." }
+            ],
+            acceptableAnswers: ["Amy bought all the ingredients except the flour.", "Amy bought all the ingredients except for the flour."]
+          },
+          {
+            id: "u3_q4",
+            given: "The pineapple has a rough skin. The mango does not.",
+            stem: "Unlike ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Unlike the pineapple, the mango has a smooth skin.", correct: true, feedback: "Smart thinking! You replaced 'not rough' with its antonym 'smooth' (or 'does not have a rough skin')." },
+              { text: "Unlike the pineapple, the mango has a rough skin.", correct: false, feedback: "Opposite meaning! The mango does NOT have a rough skin." },
+              { text: "Unlike the pineapple has a rough skin, the mango does not.", correct: false, feedback: "Follow 'Unlike' with a noun phrase ('Unlike the pineapple,'), not a full clause." },
+              { text: "Unlike the pineapple, the mango does not.", correct: false, feedback: "Incomplete sentence! State what the mango has or does not have." }
+            ],
+            acceptableAnswers: [
+              "Unlike the pineapple, the mango has a smooth skin.",
+              "Unlike the pineapple, the mango does not have a rough skin."
+            ]
+          },
+          {
+            id: "u3_q5",
+            given: "Lena insisted on sleeping by herself although she was anxious.",
+            stem: "In spite of ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "In spite of her anxiety, Lena insisted on sleeping by herself.", correct: true, feedback: "Brilliant! Adjective 'anxious' transforms into the noun 'anxiety' (or 'being anxious')." },
+              { text: "In spite of she was anxious, Lena insisted on sleeping by herself.", correct: false, feedback: "After 'In spite of', use a noun phrase ('her anxiety' or 'being anxious')." },
+              { text: "In spite of anxious, Lena insisted on sleeping by herself.", correct: false, feedback: "'Anxious' is an adjective. Change it to 'her anxiety' or 'being anxious'." },
+              { text: "In spite of her anxiety, although Lena insisted on sleeping by herself.", correct: false, feedback: "Drop 'although' because 'In spite of' already shows contrast!" }
+            ],
+            acceptableAnswers: [
+              "In spite of her anxiety, Lena insisted on sleeping by herself.",
+              "In spite of being anxious, Lena insisted on sleeping by herself.",
+              "In spite of Lena's anxiety, she insisted on sleeping by herself."
             ]
           }
         ]
@@ -583,23 +804,75 @@
       {
         unitId: 4,
         title: "Unit 4: Purpose & Result",
-        connector: "in order to / so that / therefore",
+        connector: "in order to / so that / thus / therefore",
         badge: "🎯",
         badgeName: "Purpose Pilot",
+        watchIt: "💡 Watch It! Match the tense of your modal verb after 'so that' (present: will/can/may; past: would/could). After 'in order to', always use the base verb!",
         questions: [
           {
             id: "u4_q1",
             given: "Jia Wei ran to the bus stop. He did not want to be late.",
-            prompt: "so that",
+            stem: "___________________________ so that ___________________________.",
             mcqOptions: [
-              { text: "Jia Wei ran to the bus stop so that he would not be late.", correct: true, feedback: "Spot on! The modal 'would' correctly matches the past tense 'ran'." },
-              { text: "Jia Wei ran to the bus stop so that he will not be late.", correct: false, feedback: "Tense mismatch! 'Ran' is past tense, so use past modal 'would', not 'will'." },
-              { text: "Jia Wei ran to the bus stop so that not to be late.", correct: false, feedback: "'So that' must be followed by a subject and verb clause ('he would not be...')." },
-              { text: "Jia Wei ran to the bus stop so that he would be late.", correct: false, feedback: "Opposite meaning! He ran so that he would NOT be late." }
+              { text: "Jia Wei ran to the bus stop so that he would not be late.", correct: true, feedback: "Spot on! Past tense 'ran' pairs with past modal 'would not'." },
+              { text: "Jia Wei ran to the bus stop so that he will not be late.", correct: false, feedback: "Tense mismatch! Since 'ran' is past tense, use 'would not', not 'will not'." },
+              { text: "Jia Wei ran to the bus stop so that not to be late.", correct: false, feedback: "'So that' requires a subject and modal verb ('he would not be late')." },
+              { text: "Jia Wei ran to the bus stop so that he did not want to be late.", correct: false, feedback: "Remove 'did not want to' and replace with 'would not'." }
             ],
             acceptableAnswers: [
               "Jia Wei ran to the bus stop so that he would not be late.",
               "Jia Wei ran to the bus stop so that he could not be late."
+            ]
+          },
+          {
+            id: "u4_q2",
+            given: "The singer avoided the paparazzi by going through the back door.",
+            stem: "In order to ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "In order to avoid the paparazzi, the singer went through the back door.", correct: true, feedback: "Excellent! 'Avoided' becomes base verb 'avoid', and 'going' becomes past tense 'went'." },
+              { text: "In order to avoided the paparazzi, the singer went through the back door.", correct: false, feedback: "Use the base form 'avoid' after 'In order to'!" },
+              { text: "In order to avoid the paparazzi, the singer by going through the back door.", correct: false, feedback: "The second half needs a main verb: 'the singer went through the back door'." },
+              { text: "In order to avoiding the paparazzi, the singer went through the back door.", correct: false, feedback: "Do not use '-ing' after 'In order to'—use base form 'avoid'." }
+            ],
+            acceptableAnswers: ["In order to avoid the paparazzi, the singer went through the back door."]
+          },
+          {
+            id: "u4_q3",
+            given: "Mary put on sunscreen. She wanted protection for her skin from the UV rays.",
+            stem: "___________________________ to ___________________________.",
+            mcqOptions: [
+              { text: "Mary put on sunscreen to protect her skin from the UV rays.", correct: true, feedback: "Great job! Noun 'protection' converts into the base verb 'protect'." },
+              { text: "Mary put on sunscreen to protection her skin from the UV rays.", correct: false, feedback: "After infinitive 'to', change the noun 'protection' into verb 'protect'." },
+              { text: "Mary put on sunscreen to wanted to protect her skin from the UV rays.", correct: false, feedback: "Drop 'wanted'—'to protect' already shows her purpose!" },
+              { text: "Mary put on sunscreen to protected her skin from the UV rays.", correct: false, feedback: "Always use the base form 'protect' after 'to'." }
+            ],
+            acceptableAnswers: ["Mary put on sunscreen to protect her skin from the UV rays."]
+          },
+          {
+            id: "u4_q4",
+            given: "The mist was heavy. As a result, we did not go on our hike.",
+            stem: "___________________________, so ___________________________.",
+            mcqOptions: [
+              { text: "The mist was heavy, so we did not go on our hike.", correct: true, feedback: "Clean and accurate! 'As a result' is replaced by 'so'." },
+              { text: "The mist was heavy, so as a result we did not go on our hike.", correct: false, feedback: "Drop 'as a result' because 'so' already expresses result!" },
+              { text: "We did not go on our hike, so the mist was heavy.", correct: false, feedback: "Reversed cause and effect! The heavy mist caused the cancellation." },
+              { text: "Because the mist was heavy, so we did not go on our hike.", correct: false, feedback: "Never use 'Because' and 'so' in the same sentence!" }
+            ],
+            acceptableAnswers: ["The mist was heavy, so we did not go on our hike."]
+          },
+          {
+            id: "u4_q5",
+            given: "Joel leaves home early at 6 a.m. He does not want to be late for school.",
+            stem: "___________________________ so that ___________________________.",
+            mcqOptions: [
+              { text: "Joel leaves home early at 6 a.m. so that he will not be late for school.", correct: true, feedback: "Well done! Present tense 'leaves' pairs with present modal 'will not'." },
+              { text: "Joel leaves home early at 6 a.m. so that he would not be late for school.", correct: false, feedback: "'Leaves' is in the present tense, so use 'will not' (or 'may/can not'), not past 'would'." },
+              { text: "Joel leaves home early at 6 a.m. so that not be late for school.", correct: false, feedback: "Include the subject and modal verb after 'so that' ('he will not')." },
+              { text: "Joel leaves home early at 6 a.m. so that he will be late for school.", correct: false, feedback: "Don't forget 'not'—he wants to avoid being late!" }
+            ],
+            acceptableAnswers: [
+              "Joel leaves home early at 6 a.m. so that he will not be late for school.",
+              "Joel leaves home early at 6 a.m. so that he will not be late."
             ]
           }
         ]
@@ -607,74 +880,226 @@
       {
         unitId: 5,
         title: "Unit 5: Reason",
-        connector: "because of / since / as",
+        connector: "because / because of / since / as / for",
         badge: "💡",
         badgeName: "Reason Ranger",
+        watchIt: "💡 Watch It! 'Because', 'since', and 'as' are followed by a full clause (Subject + Verb). 'Because of' must be followed by a NOUN phrase!",
         questions: [
           {
             id: "u5_q1",
             given: "She was dehydrated, so she had a severe headache.",
-            prompt: "Because of",
+            stem: "Because of ___________________________, ___________________________.",
             mcqOptions: [
-              { text: "Because of dehydration, she had a severe headache.", correct: true, feedback: "Great word transformation! Adjective 'dehydrated' converts into the noun 'dehydration'." },
-              { text: "Because of she was dehydrated, she had a severe headache.", correct: false, feedback: "'Because of' requires a noun phrase, not a subject + verb clause." },
-              { text: "Because of being dehydrated, so she had a severe headache.", correct: false, feedback: "Drop 'so' when starting with 'Because of'!" },
-              { text: "Because of dehydrating, she had a severe headache.", correct: false, feedback: "'Dehydrating' implies an active process rather than state of dehydration." }
+              { text: "Because of dehydration, she had a severe headache.", correct: true, feedback: "Great word class shift! 'Dehydrated' turns into noun 'dehydration'." },
+              { text: "Because of she was dehydrated, she had a severe headache.", correct: false, feedback: "After 'Because of', use a noun phrase ('dehydration'), not 'she was dehydrated'." },
+              { text: "Because of dehydration, so she had a severe headache.", correct: false, feedback: "Drop 'so' when using 'Because of'!" },
+              { text: "Because of dehydrated, she had a severe headache.", correct: false, feedback: "'Dehydrated' is an adjective. Change it to 'dehydration' or 'being dehydrated'." }
             ],
             acceptableAnswers: [
               "Because of dehydration, she had a severe headache.",
               "Because of her dehydration, she had a severe headache.",
-              "Because of being dehydrated, she had a severe headache.",
-              "She had a severe headache because of dehydration.",
-              "She had a severe headache because of her dehydration."
+              "Because of being dehydrated, she had a severe headache."
             ]
+          },
+          {
+            id: "u5_q2",
+            given: "It is hot. We need to turn on the air conditioning.",
+            stem: "Because of ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Because of the heat, we need to turn on the air conditioning.", correct: true, feedback: "Spot on! Adjective 'hot' changes to the noun phrase 'the heat'." },
+              { text: "Because of it is hot, we need to turn on the air conditioning.", correct: false, feedback: "'Because of' must be followed by a noun phrase ('the heat'), not 'it is hot'." },
+              { text: "Because of hot, we need to turn on the air conditioning.", correct: false, feedback: "Change the adjective 'hot' into the noun 'the heat'!" },
+              { text: "Because of the hot, we need to turn on the air conditioning.", correct: false, feedback: "The noun form of 'hot' is 'heat' ('Because of the heat')." }
+            ],
+            acceptableAnswers: [
+              "Because of the heat, we need to turn on the air conditioning.",
+              "Because of the hot weather, we need to turn on the air conditioning."
+            ]
+          },
+          {
+            id: "u5_q3",
+            given: "I bought a new pair of shoes. The sole of my old shoes had a hole.",
+            stem: "___________________________ because of ___________________________.",
+            mcqOptions: [
+              { text: "I bought a new pair of shoes because of a hole in the sole of my old shoes.", correct: true, feedback: "Well done! You turned the second sentence into a neat noun phrase." },
+              { text: "I bought a new pair of shoes because of the sole of my old shoes had a hole.", correct: false, feedback: "Avoid the verb 'had' after 'because of'. Turn it into 'a hole in the sole...'." },
+              { text: "Because of I bought a new pair of shoes, the sole of my old shoes had a hole.", correct: false, feedback: "Reversed reason! The hole caused you to buy new shoes." },
+              { text: "I bought a new pair of shoes because of my old shoes had a hole.", correct: false, feedback: "'My old shoes had a hole' is a full clause; change 'had' to 'having' or rearrange." }
+            ],
+            acceptableAnswers: [
+              "I bought a new pair of shoes because of a hole in the sole of my old shoes.",
+              "I bought a new pair of shoes because of the hole in the sole of my old shoes."
+            ]
+          },
+          {
+            id: "u5_q4",
+            given: "Capable and enthusiastic, Angela was invited to join the team.",
+            stem: "Since ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Since Angela was capable and enthusiastic, she was invited to join the team.", correct: true, feedback: "Superb! You supplied the subject and linking verb ('Angela was')." },
+              { text: "Since capable and enthusiastic, Angela was invited to join the team.", correct: false, feedback: "'Since' needs a subject and verb ('Since Angela was capable...')." },
+              { text: "Since Angela is capable and enthusiastic, she was invited to join the team.", correct: false, feedback: "Keep the past tense 'was' to match 'was invited'!" },
+              { text: "Since her capability and enthusiasm, Angela was invited to join the team.", correct: false, feedback: "Use a subject + verb clause after 'Since', not a noun phrase." }
+            ],
+            acceptableAnswers: [
+              "Since Angela was capable and enthusiastic, she was invited to join the team.",
+              "Since she was capable and enthusiastic, Angela was invited to join the team."
+            ]
+          },
+          {
+            id: "u5_q5",
+            given: "The children were tired. The reason was that they had been at the beach all day.",
+            stem: "___________________________ as ___________________________.",
+            mcqOptions: [
+              { text: "The children were tired as they had been at the beach all day.", correct: true, feedback: "Perfect! Drop 'The reason was that' when joining with 'as'." },
+              { text: "The children were tired as the reason was that they had been at the beach all day.", correct: false, feedback: "Remove 'the reason was that'—'as' already means 'because'!" },
+              { text: "The children had been at the beach all day as they were tired.", correct: false, feedback: "Wrong logic! Being at the beach made them tired, not the other way around." },
+              { text: "The children were tired as being at the beach all day.", correct: false, feedback: "Keep the full clause 'they had been at the beach all day' after 'as'." }
+            ],
+            acceptableAnswers: ["The children were tired as they had been at the beach all day."]
           }
         ]
       },
       {
         unitId: 6,
         title: "Unit 6: Condition",
-        connector: "unless / if / in case of",
+        connector: "unless / if / in case of / Had",
         badge: "🔮",
         badgeName: "Condition Champion",
+        watchIt: "💡 Watch It! 'Unless' means 'If... not'. Avoid double negatives after 'unless'! After 'In case of', always use a noun phrase.",
         questions: [
           {
             id: "u6_q1",
             given: "You had better leave now. Otherwise, you will not catch the bus.",
-            prompt: "Unless",
+            stem: "Unless ___________________________, ___________________________.",
             mcqOptions: [
-              { text: "Unless you leave now, you will not catch the bus.", correct: true, feedback: "Correct! 'Unless' means 'If you do not'." },
-              { text: "Unless you do not leave now, you will not catch the bus.", correct: false, feedback: "Double negative trap! Never put 'not' immediately inside the 'unless' clause." },
-              { text: "Unless you leave now, you will catch the bus.", correct: false, feedback: "Meaning reversed! If you do not leave now, you miss it." },
-              { text: "Unless you left now, you will not catch the bus.", correct: false, feedback: "Tense mismatch between condition and result." }
+              { text: "Unless you leave now, you will not catch the bus.", correct: true, feedback: "Correct! 'Unless' replaces 'If you do not'." },
+              { text: "Unless you do not leave now, you will not catch the bus.", correct: false, feedback: "Double negative trap! Do not put 'do not' right after 'Unless'." },
+              { text: "Unless you leave now, you will catch the bus.", correct: false, feedback: "Meaning reversed! If you don't leave now, you WILL NOT catch it." },
+              { text: "Unless you had better leave now, you will not catch the bus.", correct: false, feedback: "Drop 'had better' when using 'Unless'." }
+            ],
+            acceptableAnswers: ["Unless you leave now, you will not catch the bus."]
+          },
+          {
+            id: "u6_q2",
+            given: "Jump into the water if bees attack.",
+            stem: "___________________________ in case of ___________________________.",
+            mcqOptions: [
+              { text: "Jump into the water in case of a bee attack.", correct: true, feedback: "Great transformation! Clause 'bees attack' becomes noun phrase 'a bee attack'." },
+              { text: "Jump into the water in case of bees attack.", correct: false, feedback: "'Bees attack' is a clause. Change it to the noun phrase 'a bee attack'!" },
+              { text: "Jump into the water in case of if bees attack.", correct: false, feedback: "Remove 'if' when using 'in case of'." },
+              { text: "In case of jump into the water, bees attack.", correct: false, feedback: "'In case of' must introduce the emergency ('a bee attack'), not the action." }
             ],
             acceptableAnswers: [
-              "Unless you leave now, you will not catch the bus.",
-              "You will not catch the bus unless you leave now."
+              "Jump into the water in case of a bee attack.",
+              "Jump into the water in case of an attack by bees."
             ]
+          },
+          {
+            id: "u6_q3",
+            given: "Tom could have been punctual. In that way, he would not have been confined to camp.",
+            stem: "Had ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Had Tom been punctual, he would not have been confined to camp.", correct: true, feedback: "Masterful past perfect conditional! 'Had Tom been' means 'If Tom had been'." },
+              { text: "Had Tom could be punctual, he would not have been confined to camp.", correct: false, feedback: "Drop 'could'! The structure is 'Had + Subject + Past Participle' ('Had Tom been')." },
+              { text: "Had Tom was punctual, he would not have been confined to camp.", correct: false, feedback: "After 'Had', use the past participle 'been', not 'was'." },
+              { text: "Had Tom been punctual, he would be confined to camp.", correct: false, feedback: "Keep 'not' and the past perfect modal 'would not have been'!" }
+            ],
+            acceptableAnswers: ["Had Tom been punctual, he would not have been confined to camp."]
+          },
+          {
+            id: "u6_q4",
+            given: "I would drive to Malaysia. I would do it provided I owned a car.",
+            stem: "If ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "If I owned a car, I would drive to Malaysia.", correct: true, feedback: "Spot on! Simple past 'owned' pairs with 'would drive'." },
+              { text: "If I own a car, I would drive to Malaysia.", correct: false, feedback: "Keep the past tense 'owned' for this imaginary condition!" },
+              { text: "If I owned a car, I will drive to Malaysia.", correct: false, feedback: "Match 'owned' with 'would drive', not 'will drive'." },
+              { text: "If provided I owned a car, I would drive to Malaysia.", correct: false, feedback: "Drop 'provided' because 'If' replaces it!" }
+            ],
+            acceptableAnswers: ["If I owned a car, I would drive to Malaysia."]
+          },
+          {
+            id: "u6_q5",
+            given: "The weather must be clear, or else the Red Lions will not jump.",
+            stem: "___________________________ unless ___________________________.",
+            mcqOptions: [
+              { text: "The Red Lions will not jump unless the weather is clear.", correct: true, feedback: "Well done! 'Must be' changes to simple present 'is' after 'unless'." },
+              { text: "The Red Lions will not jump unless the weather is not clear.", correct: false, feedback: "Avoid double negatives! 'Unless the weather is clear' means 'if it is not clear'." },
+              { text: "The Red Lions will jump unless the weather is clear.", correct: false, feedback: "Opposite meaning! They will NOT jump unless the weather is clear." },
+              { text: "The Red Lions will not jump unless the weather must be clear.", correct: false, feedback: "Change 'must be' to 'is' after 'unless'." }
+            ],
+            acceptableAnswers: ["The Red Lions will not jump unless the weather is clear."]
           }
         ]
       },
       {
         unitId: 7,
         title: "Unit 7: Emphasis",
-        connector: "so... that / such... that",
+        connector: "so... that / such... that / So + Inversion",
         badge: "⚡",
         badgeName: "Emphasis Expert",
+        watchIt: "💡 Watch It! Use an ADJECTIVE/ADVERB after 'so' ('so tired that'), but use a NOUN PHRASE after 'such' ('such a dark place that'). Remember to drop 'very' or 'extremely'!",
         questions: [
           {
             id: "u7_q1",
             given: "The drummer played extremely loudly. I was almost deafened.",
-            prompt: "So loudly",
+            stem: "So loudly ___________________________ that ___________________________.",
             mcqOptions: [
-              { text: "So loudly did the drummer play that I was almost deafened.", correct: true, feedback: "Masterful inversion! 'Did' comes before subject 'the drummer', and 'play' is base form." },
-              { text: "So loudly the drummer played that I was almost deafened.", correct: false, feedback: "Inversion needed! Starting with 'So loudly' requires helping verb 'did' before the subject." },
-              { text: "So loudly did the drummer played that I was almost deafened.", correct: false, feedback: "Trap alert! After auxiliary 'did', the main verb must be base form 'play', not 'played'." },
-              { text: "So loudly does the drummer play that I was almost deafened.", correct: false, feedback: "Tense clash! 'Does' is present tense, but the original event happened in the past." }
+              { text: "So loudly did the drummer play that I was almost deafened.", correct: true, feedback: "Brilliant inversion! 'Did' comes before the subject and 'played' becomes base verb 'play'." },
+              { text: "So loudly the drummer played that I was almost deafened.", correct: false, feedback: "When starting with 'So loudly', invert the verb: 'did the drummer play'." },
+              { text: "So loudly did the drummer played that I was almost deafened.", correct: false, feedback: "After 'did', the verb must return to base form 'play'!" },
+              { text: "So extremely loudly did the drummer play that I was almost deafened.", correct: false, feedback: "Drop 'extremely'—'So' replaces it!" }
             ],
-            acceptableAnswers: [
-              "So loudly did the drummer play that I was almost deafened."
-            ]
+            acceptableAnswers: ["So loudly did the drummer play that I was almost deafened."]
+          },
+          {
+            id: "u7_q2",
+            given: "It was a very dark place. I could barely make out anything.",
+            stem: "___________________________ such ___________________________ that ___________________________.",
+            mcqOptions: [
+              { text: "It was such a dark place that I could barely make out anything.", correct: true, feedback: "Spot on! 'Such' is followed by the noun phrase 'a dark place'." },
+              { text: "It was such a very dark place that I could barely make out anything.", correct: false, feedback: "Remove 'very' when using 'such'!" },
+              { text: "It was such dark place that I could barely make out anything.", correct: false, feedback: "Don't forget the article 'a' ('such a dark place')!" },
+              { text: "It was such dark that I could barely make out anything.", correct: false, feedback: "Include the noun 'place' after 'such a dark'!" }
+            ],
+            acceptableAnswers: ["It was such a dark place that I could barely make out anything."]
+          },
+          {
+            id: "u7_q3",
+            given: "Wan Qi is very meticulous. She takes a long time to complete her project.",
+            stem: "___________________________ so ___________________________ that ___________________________.",
+            mcqOptions: [
+              { text: "Wan Qi is so meticulous that she takes a long time to complete her project.", correct: true, feedback: "Perfect! 'Very' is replaced by 'so'." },
+              { text: "Wan Qi is so very meticulous that she takes a long time to complete her project.", correct: false, feedback: "Leave out 'very' when using 'so'!" },
+              { text: "Wan Qi is so meticulous Girl that she takes a long time to complete her project.", correct: false, feedback: "Just keep the adjective 'meticulous' between 'so' and 'that'." },
+              { text: "Wan Qi was so meticulous that she takes a long time to complete her project.", correct: false, feedback: "Keep the present tense 'is'!" }
+            ],
+            acceptableAnswers: ["Wan Qi is so meticulous that she takes a long time to complete her project."]
+          },
+          {
+            id: "u7_q4",
+            given: "The library was extremely crowded. We could not find a seat.",
+            stem: "It was such ___________________________ that ___________________________.",
+            mcqOptions: [
+              { text: "It was such a crowded library that we could not find a seat.", correct: true, feedback: "Awesome! You converted 'The library was crowded' into 'a crowded library'." },
+              { text: "It was such crowded library that we could not find a seat.", correct: false, feedback: "Remember the article 'a' ('such a crowded library')!" },
+              { text: "It was such an extremely crowded library that we could not find a seat.", correct: false, feedback: "Drop the intensifier 'extremely' when using 'such'!" },
+              { text: "It was such a crowded that we could not find a seat.", correct: false, feedback: "'Such a crowded' needs the noun 'library' right after it!" }
+            ],
+            acceptableAnswers: ["It was such a crowded library that we could not find a seat."]
+          },
+          {
+            id: "u7_q5",
+            given: "Mr Chan was very tired. He went to bed without having dinner.",
+            stem: "So tired ___________________________ that ___________________________.",
+            mcqOptions: [
+              { text: "So tired was Mr Chan that he went to bed without having dinner.", correct: true, feedback: "Great inversion! The linking verb 'was' moves in front of 'Mr Chan'." },
+              { text: "So tired Mr Chan was that he went to bed without having dinner.", correct: false, feedback: "Invert the verb and subject: 'So tired was Mr Chan...'." },
+              { text: "So very tired was Mr Chan that he went to bed without having dinner.", correct: false, feedback: "Remove 'very'!" },
+              { text: "So tired did Mr Chan that he went to bed without having dinner.", correct: false, feedback: "The original verb is 'was', so use 'was Mr Chan', not 'did'." }
+            ],
+            acceptableAnswers: ["So tired was Mr Chan that he went to bed without having dinner."]
           }
         ]
       },
@@ -684,19 +1109,69 @@
         connector: "prefer... to / would rather... than",
         badge: "🏆",
         badgeName: "Preference Pro",
+        watchIt: "💡 Watch It! Always pair 'prefer' with 'to' (and use nouns/gerunds: 'prefers swimming to running'). Pair 'would rather' with 'than' (and use BASE verbs: 'would rather swim than run')!",
         questions: [
           {
             id: "u8_q1",
             given: "Leon likes to waterski. He likes to sail even more.",
-            prompt: "prefers",
+            stem: "Leon prefers ___________________________.",
             mcqOptions: [
-              { text: "Leon prefers sailing to waterskiing.", correct: true, feedback: "Spot on! 'Prefer' pairs with 'to', and uses parallel gerunds ('sailing to waterskiing')." },
-              { text: "Leon prefers sailing than waterskiing.", correct: false, feedback: "Trap alert! Always say 'prefer X to Y', never 'prefer X than Y'." },
-              { text: "Leon prefers to sail than waterski.", correct: false, feedback: "Use gerunds with 'prefers': 'sailing to waterskiing'." },
-              { text: "Leon prefers waterskiing to sailing.", correct: false, feedback: "Careful! He likes sailing MORE, so sailing comes first." }
+              { text: "Leon prefers sailing to waterskiing.", correct: true, feedback: "Spot on! Put the preferred activity ('sailing') first and pair with 'to'." },
+              { text: "Leon prefers sailing than waterskiing.", correct: false, feedback: "Trap alert! Never use 'than' with 'prefers'—always use 'to'!" },
+              { text: "Leon prefers waterskiing to sailing.", correct: false, feedback: "Check the preference! He likes sailing MORE, so 'sailing' must come first." },
+              { text: "Leon prefers to sail than waterski.", correct: false, feedback: "Use gerunds ('sailing to waterskiing') and 'to'!" }
+            ],
+            acceptableAnswers: ["Leon prefers sailing to waterskiing."]
+          },
+          {
+            id: "u8_q2",
+            given: "Rachel enjoys dancing. She enjoys singing even more.",
+            stem: "Rachel would rather ___________________________ than ___________________________.",
+            mcqOptions: [
+              { text: "Rachel would rather sing than dance.", correct: true, feedback: "Excellent! 'Singing' and 'dancing' change to base verbs 'sing' and 'dance'." },
+              { text: "Rachel would rather singing than dancing.", correct: false, feedback: "After 'would rather', always use the base verb ('sing'), not '-ing'!" },
+              { text: "Rachel would rather dance than sing.", correct: false, feedback: "Careful! She enjoys singing MORE, so 'sing' comes first." },
+              { text: "Rachel would rather sing to dance.", correct: false, feedback: "'Would rather' pairs with 'than', not 'to'!" }
+            ],
+            acceptableAnswers: ["Rachel would rather sing than dance."]
+          },
+          {
+            id: "u8_q3",
+            given: "Rae Ting does not appreciate rap, but she appreciates jazz.",
+            stem: "Rae Ting prefers ___________________________.",
+            mcqOptions: [
+              { text: "Rae Ting prefers jazz to rap.", correct: true, feedback: "Clean and accurate! She likes jazz over rap." },
+              { text: "Rae Ting prefers jazz than rap.", correct: false, feedback: "Use 'to' with 'prefers', never 'than'!" },
+              { text: "Rae Ting prefers rap to jazz.", correct: false, feedback: "She appreciates jazz, not rap—put 'jazz' first!" },
+              { text: "Rae Ting prefers appreciating jazz than rap.", correct: false, feedback: "Simply write 'prefers jazz to rap'." }
+            ],
+            acceptableAnswers: ["Rae Ting prefers jazz to rap."]
+          },
+          {
+            id: "u8_q4",
+            given: "Instead of donating money, Benedict wished to volunteer at a children's home.",
+            stem: "Benedict would rather ___________________________ than ___________________________.",
+            mcqOptions: [
+              { text: "Benedict would rather volunteer at a children's home than donate money.", correct: true, feedback: "Well done! Both verbs ('volunteer' and 'donate') are in their base form." },
+              { text: "Benedict would rather volunteer at a children's home than donating money.", correct: false, feedback: "Parallel structure check! Change 'donating' to base verb 'donate' after 'than'." },
+              { text: "Benedict would rather to volunteer at a children's home than donate money.", correct: false, feedback: "Drop 'to' right after 'would rather'!" },
+              { text: "Benedict would rather donate money than volunteer at a children's home.", correct: false, feedback: "Reversed meaning! He wanted to volunteer INSTEAD of donating money." }
+            ],
+            acceptableAnswers: ["Benedict would rather volunteer at a children's home than donate money."]
+          },
+          {
+            id: "u8_q5",
+            given: "Nicole enjoys cooking Italian food. She likes cooking Peranakan food even better.",
+            stem: "Nicole prefers ___________________________.",
+            mcqOptions: [
+              { text: "Nicole prefers cooking Peranakan food to cooking Italian food.", correct: true, feedback: "Great job! Peranakan food comes first as her favourite." },
+              { text: "Nicole prefers cooking Peranakan food than Italian food.", correct: false, feedback: "Remember: 'prefer X to Y', not 'than'!" },
+              { text: "Nicole prefers cooking Italian food to Peranakan food.", correct: false, feedback: "She likes Peranakan food better, so put Peranakan food first!" },
+              { text: "Nicole prefers cook Peranakan food to Italian food.", correct: false, feedback: "Keep the gerund 'cooking' after 'prefers'!" }
             ],
             acceptableAnswers: [
-              "Leon prefers sailing to waterskiing."
+              "Nicole prefers cooking Peranakan food to cooking Italian food.",
+              "Nicole prefers cooking Peranakan food to Italian food."
             ]
           }
         ]
@@ -704,23 +1179,78 @@
       {
         unitId: 9,
         title: "Unit 9: People",
-        connector: "who / whom / whose",
+        connector: "who / whom / whose / whoever",
         badge: "👥",
         badgeName: "People Pioneer",
+        watchIt: "💡 Watch It! Use 'who' before a verb, 'whom' when followed by a subject pronoun/noun receiving the action, and 'whose' to show possession. Use either a PAIR of commas or NO commas!",
         questions: [
           {
             id: "u9_q1",
             given: "The zookeeper was attacked by the tiger. He was very experienced.",
-            prompt: "whom",
+            stem: "The zookeeper whom ___________________________.",
             mcqOptions: [
-              { text: "The zookeeper whom the tiger attacked was very experienced.", correct: true, feedback: "Well done! 'Whom' refers to the object receiving the action (attacked by the tiger)." },
-              { text: "The zookeeper whom was attacked by the tiger was very experienced.", correct: false, feedback: "'Whom' cannot act as the subject of 'was attacked'." },
-              { text: "The zookeeper whom attacked the tiger was very experienced.", correct: false, feedback: "Reversed agent! The tiger attacked the zookeeper, not vice versa." },
-              { text: "The zookeeper whom the tiger attacked him was very experienced.", correct: false, feedback: "Redundancy error: drop 'him' because 'whom' already replaces it." }
+              { text: "The zookeeper whom the tiger attacked was very experienced.", correct: true, feedback: "Spot on! 'Whom' is followed by the subject 'the tiger' performing the action." },
+              { text: "The zookeeper whom was attacked by the tiger was very experienced.", correct: false, feedback: "'Whom' cannot be followed directly by the verb 'was attacked'." },
+              { text: "The zookeeper whom the tiger attacked him was very experienced.", correct: false, feedback: "Drop 'him'—'whom' already replaces the zookeeper!" },
+              { text: "The zookeeper, whom the tiger attacked was very experienced.", correct: false, feedback: "Never use just ONE comma for a relative clause. Use two commas or none!" }
             ],
             acceptableAnswers: [
               "The zookeeper whom the tiger attacked was very experienced.",
               "The zookeeper, whom the tiger attacked, was very experienced."
+            ]
+          },
+          {
+            id: "u9_q2",
+            given: "Eric is the head librarian. Eric is wearing the blue cap.",
+            stem: "Eric, who ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Eric, who is wearing the blue cap, is the head librarian.", correct: true, feedback: "Perfect! The relative clause is neatly enclosed by a pair of commas." },
+              { text: "Eric, who is wearing the blue cap is the head librarian.", correct: false, feedback: "Missing the second comma after 'blue cap'!" },
+              { text: "Eric, who he is wearing the blue cap, is the head librarian.", correct: false, feedback: "Remove 'he' because 'who' already stands for Eric!" },
+              { text: "Eric, who was wearing the blue cap, is the head librarian.", correct: false, feedback: "Keep the present tense 'is wearing'!" }
+            ],
+            acceptableAnswers: [
+              "Eric, who is wearing the blue cap, is the head librarian.",
+              "Eric, who is the head librarian, is wearing the blue cap."
+            ]
+          },
+          {
+            id: "u9_q3",
+            given: "Gary is visiting Vietnam. The jacket I am wearing belongs to him.",
+            stem: "Gary, whose ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Gary, whose jacket I am wearing, is visiting Vietnam.", correct: true, feedback: "Excellent! 'Whose jacket' replaces 'The jacket... belongs to him'." },
+              { text: "Gary, whose jacket I am wearing belongs to him, is visiting Vietnam.", correct: false, feedback: "Remove 'belongs to him' because 'whose' already shows possession!" },
+              { text: "Gary, whose visiting Vietnam, has the jacket I am wearing.", correct: false, feedback: "'Whose' must be followed by the possessed noun ('jacket'), not 'visiting'." },
+              { text: "Gary, whose the jacket I am wearing, is visiting Vietnam.", correct: false, feedback: "Drop 'the' after 'whose'—write 'whose jacket'!" }
+            ],
+            acceptableAnswers: ["Gary, whose jacket I am wearing, is visiting Vietnam."]
+          },
+          {
+            id: "u9_q4",
+            given: "All who sign up for the race will receive a free T-shirt.",
+            stem: "Whoever ___________________________.",
+            mcqOptions: [
+              { text: "Whoever signs up for the race will receive a free T-shirt.", correct: true, feedback: "Sharp eye! 'Whoever' is singular, so 'sign' changes to singular 'signs'." },
+              { text: "Whoever sign up for the race will receive a free T-shirt.", correct: false, feedback: "Subject-verb agreement trap! 'Whoever' takes a singular verb ('signs')." },
+              { text: "Whoever who signs up for the race will receive a free T-shirt.", correct: false, feedback: "Do not add 'who' after 'Whoever'!" },
+              { text: "Whoever signs up for the race will received a free T-shirt.", correct: false, feedback: "After modal 'will', keep base form 'receive'." }
+            ],
+            acceptableAnswers: ["Whoever signs up for the race will receive a free T-shirt."]
+          },
+          {
+            id: "u9_q5",
+            given: "The invigilator's shoes were three inches high. She walked around the hall tirelessly.",
+            stem: "The invigilator whose ___________________________.",
+            mcqOptions: [
+              { text: "The invigilator whose shoes were three inches high walked around the hall tirelessly.", correct: true, feedback: "Well done! 'Whose shoes' connects the two sentences smoothly." },
+              { text: "The invigilator whose her shoes were three inches high walked around the hall tirelessly.", correct: false, feedback: "Drop 'her' after 'whose'!" },
+              { text: "The invigilator whose walked around the hall tirelessly had shoes three inches high.", correct: false, feedback: "Place the noun 'shoes' immediately after 'whose'!" },
+              { text: "The invigilator whose shoes were three inches high she walked around the hall tirelessly.", correct: false, feedback: "Remove the extra pronoun 'she' before 'walked'!" }
+            ],
+            acceptableAnswers: [
+              "The invigilator whose shoes were three inches high walked around the hall tirelessly.",
+              "The invigilator, whose shoes were three inches high, walked around the hall tirelessly."
             ]
           }
         ]
@@ -728,46 +1258,151 @@
       {
         unitId: 10,
         title: "Unit 10: Places & Things",
-        connector: "where / which / that",
+        connector: "where / wherever / which / that",
         badge: "📍",
         badgeName: "Place Tracker",
+        watchIt: "💡 Watch It! When using 'where' for a place, remember to remove location words like 'there' or 'at the shop' so you don't repeat yourself!",
         questions: [
           {
             id: "u10_q1",
             given: "That is the shop. I get good bargains at that shop.",
-            prompt: "where",
+            stem: "That is the shop where ___________________________.",
             mcqOptions: [
-              { text: "That is the shop where I get good bargains.", correct: true, feedback: "Spot on! Drop 'at that shop' because 'where' replaces the location phrase." },
-              { text: "That is the shop where I get good bargains there.", correct: false, feedback: "Redundancy error! Remove 'there' when 'where' is used." },
-              { text: "That is the shop which I get good bargains.", correct: false, feedback: "'Shop' is a place where an action happens; use 'where' or 'at which'." },
-              { text: "That is the shop where at I get good bargains.", correct: false, feedback: "Do not retain the preposition 'at' after 'where'." }
+              { text: "That is the shop where I get good bargains.", correct: true, feedback: "Spot on! You dropped 'at that shop' because 'where' replaces it." },
+              { text: "That is the shop where I get good bargains there.", correct: false, feedback: "Redundancy trap! Remove 'there' when using 'where'." },
+              { text: "That is the shop where I get good bargains at that shop.", correct: false, feedback: "Remove 'at that shop' at the end!" },
+              { text: "That is the shop where I got good bargains.", correct: false, feedback: "Keep the present tense 'get'!" }
+            ],
+            acceptableAnswers: ["That is the shop where I get good bargains."]
+          },
+          {
+            id: "u10_q2",
+            given: "The computer will be replaced. It does not work properly.",
+            stem: "The computer that ___________________________.",
+            mcqOptions: [
+              { text: "The computer that does not work properly will be replaced.", correct: true, feedback: "Perfect! The relative clause 'that does not work properly' describes 'The computer'." },
+              { text: "The computer that it does not work properly will be replaced.", correct: false, feedback: "Remove 'it' because 'that' already replaces 'It'!" },
+              { text: "The computer that will be replaced does not work properly.", correct: false, feedback: "Keep the main focus on 'will be replaced' as the main predicate." },
+              { text: "The computer that do not work properly will be replaced.", correct: false, feedback: "Singular 'computer' requires 'does not', not 'do not'." }
+            ],
+            acceptableAnswers: ["The computer that does not work properly will be replaced."]
+          },
+          {
+            id: "u10_q3",
+            given: "The plant is wilting. I bought the plant from the nursery next door.",
+            stem: "The plant which ___________________________.",
+            mcqOptions: [
+              { text: "The plant which I bought from the nursery next door is wilting.", correct: true, feedback: "Excellent! 'Which I bought from the nursery next door' modifies 'The plant'." },
+              { text: "The plant which I bought it from the nursery next door is wilting.", correct: false, feedback: "Drop 'it'! 'Which' already refers to the plant." },
+              { text: "The plant which is wilting I bought from the nursery next door.", correct: false, feedback: "Place 'which I bought from the nursery next door' right after 'The plant'." },
+              { text: "The plant, which I bought from the nursery next door is wilting.", correct: false, feedback: "Do not use only one comma!" }
             ],
             acceptableAnswers: [
-              "That is the shop where I get good bargains."
+              "The plant which I bought from the nursery next door is wilting.",
+              "The plant, which I bought from the nursery next door, is wilting."
             ]
+          },
+          {
+            id: "u10_q4",
+            given: "Linus' blanket goes to every place that he goes.",
+            stem: "___________________________ wherever ___________________________.",
+            mcqOptions: [
+              { text: "Linus' blanket goes wherever he goes.", correct: true, feedback: "Clean and concise! 'Wherever' replaces 'to every place that'." },
+              { text: "Linus' blanket goes to wherever place he goes.", correct: false, feedback: "Remove 'to' and 'place'—just write 'wherever he goes'!" },
+              { text: "Linus' blanket goes wherever that he goes.", correct: false, feedback: "Drop 'that' after 'wherever'!" },
+              { text: "Wherever Linus' blanket goes, he goes to every place.", correct: false, feedback: "Keep the meaning: the blanket follows Linus wherever he goes." }
+            ],
+            acceptableAnswers: ["Linus' blanket goes wherever he goes.", "Wherever Linus goes, his blanket goes."]
+          },
+          {
+            id: "u10_q5",
+            given: "I like to go to Peirce Reservoir. I sometimes see monkeys there.",
+            stem: "I like to go to Peirce Reservoir, where ___________________________.",
+            mcqOptions: [
+              { text: "I like to go to Peirce Reservoir, where I sometimes see monkeys.", correct: true, feedback: "Great job! You remembered to drop the word 'there'." },
+              { text: "I like to go to Peirce Reservoir, where I sometimes see monkeys there.", correct: false, feedback: "Don't repeat 'there' when you have already used 'where'!" },
+              { text: "I like to go to Peirce Reservoir, where sometimes see monkeys.", correct: false, feedback: "Don't forget the subject pronoun 'I' ('where I sometimes see monkeys')." },
+              { text: "I like to go to Peirce Reservoir, where I sometimes saw monkeys.", correct: false, feedback: "Keep the present tense 'see'!" }
+            ],
+            acceptableAnswers: ["I like to go to Peirce Reservoir, where I sometimes see monkeys."]
           }
         ]
       },
       {
         unitId: 11,
         title: "Unit 11: Direct & Indirect Speech",
-        connector: "told / asked / said that",
+        connector: "said that / told / asked if",
         badge: "🗣️",
         badgeName: "Speech Specialist",
+        watchIt: "💡 Watch It! Shift tenses back (present ➔ past; past ➔ 'had' + past participle). Change time/place words ('yesterday' ➔ 'the previous day', 'this' ➔ 'that'). In reported questions, put the subject BEFORE the verb!",
         questions: [
           {
             id: "u11_q1",
             given: "\"Darryl drank up all the milk,\" said Wen Xuan.",
-            prompt: "Wen Xuan said that",
+            stem: "Wen Xuan said that ___________________________.",
             mcqOptions: [
-              { text: "Wen Xuan said that Darryl had drunk up all the milk.", correct: true, feedback: "Brilliant! Simple past 'drank' backshifts to past perfect 'had drunk'." },
-              { text: "Wen Xuan said that Darryl drank up all the milk.", correct: false, feedback: "Remember the backshift! Simple past 'drank' must change to past perfect 'had drunk'." },
-              { text: "Wen Xuan said that Darryl had drank up all the milk.", correct: false, feedback: "Irregular verb check! The past participle of drink is 'drunk' (had drunk), not 'had drank'." },
-              { text: "Wen Xuan told that Darryl had drunk up all the milk.", correct: false, feedback: "'Told' needs a person receiver (e.g., 'told me'). Use 'said that' here." }
+              { text: "Wen Xuan said that Darryl had drunk up all the milk.", correct: true, feedback: "Brilliant! Past tense 'drank' shifts to past perfect 'had drunk'." },
+              { text: "Wen Xuan said that Darryl drank up all the milk.", correct: false, feedback: "Shift simple past 'drank' to past perfect 'had drunk'!" },
+              { text: "Wen Xuan said that Darryl had drank up all the milk.", correct: false, feedback: "Grammar check! The past participle of 'drink' is 'drunk' ('had drunk')." },
+              { text: "Wen Xuan said that Darryl has drunk up all the milk.", correct: false, feedback: "Because 'said' is past tense, use 'had drunk', not 'has drunk'." }
             ],
             acceptableAnswers: [
               "Wen Xuan said that Darryl had drunk up all the milk.",
               "Wen Xuan said that Darryl had drunk all the milk."
+            ]
+          },
+          {
+            id: "u11_q2",
+            given: "\"We will be visiting the home next week,\" Miss Lim told the class.",
+            stem: "Miss Lim told the class that ___________________________.",
+            mcqOptions: [
+              { text: "Miss Lim told the class that they would be visiting the home the following week.", correct: true, feedback: "Spot on! 'We' ➔ 'they', 'will' ➔ 'would', and 'next week' ➔ 'the following week'." },
+              { text: "Miss Lim told the class that they would be visiting the home next week.", correct: false, feedback: "Don't forget to change 'next week' to 'the following week'!" },
+              { text: "Miss Lim told the class that we would be visiting the home the following week.", correct: false, feedback: "Change the pronoun 'We' to 'they'!" },
+              { text: "Miss Lim told the class that they will be visiting the home the following week.", correct: false, feedback: "Shift 'will' to past modal 'would'!" }
+            ],
+            acceptableAnswers: [
+              "Miss Lim told the class that they would be visiting the home the following week.",
+              "Miss Lim told the class that they would be visiting the home the next week."
+            ]
+          },
+          {
+            id: "u11_q3",
+            given: "Mr Tan warned the class, \"Don't touch the hot beaker with your bare hands.\"",
+            stem: "Mr Tan warned the class ___________________________.",
+            mcqOptions: [
+              { text: "Mr Tan warned the class not to touch the hot beaker with their bare hands.", correct: true, feedback: "Excellent! 'Don't touch' becomes 'not to touch' and 'your' becomes 'their'." },
+              { text: "Mr Tan warned the class to not touch the hot beaker with your bare hands.", correct: false, feedback: "Use 'not to touch' and change 'your' to 'their'!" },
+              { text: "Mr Tan warned the class do not touch the hot beaker with their bare hands.", correct: false, feedback: "Reported commands use 'not to + base verb' ('not to touch')." },
+              { text: "Mr Tan warned the class not to touched the hot beaker with their bare hands.", correct: false, feedback: "Keep base verb 'touch' after 'not to'!" }
+            ],
+            acceptableAnswers: ["Mr Tan warned the class not to touch the hot beaker with their bare hands."]
+          },
+          {
+            id: "u11_q4",
+            given: "Jane asked me, \"Did the principal give out the prizes?\"",
+            stem: "Jane asked me if ___________________________.",
+            mcqOptions: [
+              { text: "Jane asked me if the principal had given out the prizes.", correct: true, feedback: "Superb! 'Did... give' is past tense, so it shifts to past perfect 'had given'." },
+              { text: "Jane asked me if the principal gave out the prizes.", correct: false, feedback: "Watch out! When a question uses 'Did', shift it to past perfect ('had given')." },
+              { text: "Jane asked me if did the principal give out the prizes.", correct: false, feedback: "Remove 'did' and use statement word order ('if the principal had given')." },
+              { text: "Jane asked me if the principal had gave out the prizes.", correct: false, feedback: "After 'had', use past participle 'given', not 'gave'!" }
+            ],
+            acceptableAnswers: ["Jane asked me if the principal had given out the prizes."]
+          },
+          {
+            id: "u11_q5",
+            given: "\"How did you get to the concert hall yesterday?\" Bob asked me.",
+            stem: "Bob asked me ___________________________.",
+            mcqOptions: [
+              { text: "Bob asked me how I had got to the concert hall the previous day.", correct: true, feedback: "Masterful! 'Did you get' ➔ 'I had got/gotten' and 'yesterday' ➔ 'the previous day'." },
+              { text: "Bob asked me how did I get to the concert hall the previous day.", correct: false, feedback: "Never keep question word order ('did I get') in indirect speech!" },
+              { text: "Bob asked me how I had got to the concert hall yesterday.", correct: false, feedback: "Change 'yesterday' to 'the previous day'!" },
+              { text: "Bob asked me how you had got to the concert hall the previous day.", correct: false, feedback: "Bob asked 'me', so change 'you' to 'I'!" }
+            ],
+            acceptableAnswers: [
+              "Bob asked me how I had got to the concert hall the previous day.",
+              "Bob asked me how I had gotten to the concert hall the previous day."
             ]
           }
         ]
@@ -775,22 +1410,75 @@
       {
         unitId: 12,
         title: "Unit 12: Active & Passive Voice",
-        connector: "was/were + past participle",
+        connector: "be + past participle + by",
         badge: "🔄",
         badgeName: "Voice Virtuoso",
+        watchIt: "💡 Watch It! Keep the exact same tense (Present Continuous ➔ 'is/are being + participle'; Present Perfect ➔ 'has/have been + participle'). Check if the new subject is singular or plural!",
         questions: [
           {
             id: "u12_q1",
             given: "The workmen are digging up the roads.",
-            prompt: "The roads",
+            stem: "The roads ___________________________.",
             mcqOptions: [
-              { text: "The roads are being dug up by the workmen.", correct: true, feedback: "Perfect! Present continuous passive requires 'are being + past participle'." },
-              { text: "The roads were being dug up by the workmen.", correct: false, feedback: "Keep the tense consistent! 'Are digging' is present, not past 'were'." },
-              { text: "The roads are dug up by the workmen.", correct: false, feedback: "'Are dug' loses the continuous '-ing' action. Use 'are being dug'." },
-              { text: "The roads are being digged up by the workmen.", correct: false, feedback: "Check irregular past participle! The form is 'dug', not 'digged'." }
+              { text: "The roads are being dug up by the workmen.", correct: true, feedback: "Perfect! Present continuous passive uses 'are being + past participle (dug)'." },
+              { text: "The roads were being dug up by the workmen.", correct: false, feedback: "Keep the present tense 'are', do not shift to past 'were'!" },
+              { text: "The roads are dug up by the workmen.", correct: false, feedback: "Don't lose the continuous '-ing' meaning—include 'being' ('are being dug')!" },
+              { text: "The roads is being dug up by the workmen.", correct: false, feedback: "'The roads' is plural, so use 'are', not 'is'!" }
+            ],
+            acceptableAnswers: ["The roads are being dug up by the workmen."]
+          },
+          {
+            id: "u12_q2",
+            given: "My aunt has baked two cakes for the coming Chinese New Year.",
+            stem: "Two cakes ___________________________.",
+            mcqOptions: [
+              { text: "Two cakes have been baked by my aunt for the coming Chinese New Year.", correct: true, feedback: "Spot on! Plural 'Two cakes' changes 'has' to 'have been baked'." },
+              { text: "Two cakes has been baked by my aunt for the coming Chinese New Year.", correct: false, feedback: "SVA Trap! 'Two cakes' is plural, so change 'has' to 'have'!" },
+              { text: "Two cakes were baked by my aunt for the coming Chinese New Year.", correct: false, feedback: "Keep the present perfect tense ('have been baked')!" },
+              { text: "Two cakes have baked by my aunt for the coming Chinese New Year.", correct: false, feedback: "Don't forget 'been' in the passive voice ('have been baked')!" }
             ],
             acceptableAnswers: [
-              "The roads are being dug up by the workmen."
+              "Two cakes have been baked by my aunt for the coming Chinese New Year.",
+              "Two cakes have been baked for the coming Chinese New Year by my aunt."
+            ]
+          },
+          {
+            id: "u12_q3",
+            given: "The doll house had been constructed by Mary's father last year.",
+            stem: "Mary's father ___________________________.",
+            mcqOptions: [
+              { text: "Mary's father had constructed the doll house last year.", correct: true, feedback: "Great active conversion! 'Had been constructed' becomes 'had constructed'." },
+              { text: "Mary's father constructed the doll house last year.", correct: false, feedback: "Keep the past perfect tense ('had constructed')!" },
+              { text: "Mary's father has constructed the doll house last year.", correct: false, feedback: "Do not change past perfect 'had' into present perfect 'has'!" },
+              { text: "Mary's father had been constructing the doll house last year.", correct: false, feedback: "Use 'had constructed', not continuous 'had been constructing'." }
+            ],
+            acceptableAnswers: ["Mary's father had constructed the doll house last year."]
+          },
+          {
+            id: "u12_q4",
+            given: "Ling Ling was washing the dishes when I entered the house.",
+            stem: "The dishes ___________________________.",
+            mcqOptions: [
+              { text: "The dishes were being washed by Ling Ling when I entered the house.", correct: true, feedback: "Awesome! Plural 'The dishes' takes 'were being washed'." },
+              { text: "The dishes was being washed by Ling Ling when I entered the house.", correct: false, feedback: "'The dishes' is plural, so use 'were', not 'was'!" },
+              { text: "The dishes were washed by Ling Ling when I entered the house.", correct: false, feedback: "Include 'being' to keep the past continuous tense ('were being washed')!" },
+              { text: "The dishes had been washed by Ling Ling when I entered the house.", correct: false, feedback: "Keep past continuous 'were being washed'!" }
+            ],
+            acceptableAnswers: ["The dishes were being washed by Ling Ling when I entered the house."]
+          },
+          {
+            id: "u12_q5",
+            given: "The pet shop will organise a pet grooming competition next week.",
+            stem: "A pet grooming competition ___________________________.",
+            mcqOptions: [
+              { text: "A pet grooming competition will be organised by the pet shop next week.", correct: true, feedback: "Perfect! Future passive uses 'will be + past participle (organised)'." },
+              { text: "A pet grooming competition will organised by the pet shop next week.", correct: false, feedback: "Include 'be' after 'will' ('will be organised')!" },
+              { text: "A pet grooming competition would be organised by the pet shop next week.", correct: false, feedback: "Do not change 'will' to 'would' here!" },
+              { text: "A pet grooming competition will be organise by the pet shop next week.", correct: false, feedback: "Use the past participle 'organised' (with a 'd'), not base verb 'organise'!" }
+            ],
+            acceptableAnswers: [
+              "A pet grooming competition will be organised by the pet shop next week.",
+              "A pet grooming competition will be organised next week by the pet shop."
             ]
           }
         ]
@@ -798,22 +1486,72 @@
       {
         unitId: 13,
         title: "Unit 13: Interchanging Word Classes",
-        connector: "suffixes (-ance, -ion, -ness)",
+        connector: "suffixes (-ance, -ness, -ion, -less)",
         badge: "🧙‍♂️",
         badgeName: "Word Class Wizard",
+        watchIt: "💡 Watch It! Pay attention to words before the blank: an possessive/article ('Sean's sudden...', 'their...', 'a...') signals that you need to turn the verb or adjective into a NOUN!",
         questions: [
           {
             id: "u13_q1",
             given: "Sean suddenly appeared in front of Angela. He gave her a shock.",
-            prompt: "Sean's sudden",
+            stem: "Sean's sudden ___________________________.",
             mcqOptions: [
-              { text: "Sean's sudden appearance in front of Angela gave her a shock.", correct: true, feedback: "Excellent! Verb 'appeared' transforms smoothly into the noun 'appearance'." },
-              { text: "Sean's sudden appear in front of Angela gave her a shock.", correct: false, feedback: "'Appear' is a verb. After adjective 'sudden', use noun 'appearance'." },
-              { text: "Sean's sudden appearing in front of Angela gave her a shock.", correct: false, feedback: "Use the standard abstract noun 'appearance' rather than participle 'appearing'." },
-              { text: "Sean's sudden appearance gives Angela a shock.", correct: false, feedback: "Tense clash: original past tense 'gave' must not turn into 'gives'." }
+              { text: "Sean's sudden appearance in front of Angela gave her a shock.", correct: true, feedback: "Excellent! Verb 'appeared' turns into noun 'appearance'." },
+              { text: "Sean's sudden appear in front of Angela gave her a shock.", correct: false, feedback: "After adjective 'sudden', use the noun 'appearance', not verb 'appear'!" },
+              { text: "Sean's sudden appearing in front of Angela gave her a shock.", correct: false, feedback: "The proper noun form of 'appear' is 'appearance'." },
+              { text: "Sean's sudden appearance in front of Angela gives her a shock.", correct: false, feedback: "Keep the past tense 'gave'!" }
+            ],
+            acceptableAnswers: ["Sean's sudden appearance in front of Angela gave her a shock."]
+          },
+          {
+            id: "u13_q2",
+            given: "The people celebrated. They were free.",
+            stem: "The people celebrated their ___________________________.",
+            mcqOptions: [
+              { text: "The people celebrated their freedom.", correct: true, feedback: "Spot on! Adjective 'free' converts into the noun 'freedom'." },
+              { text: "The people celebrated their free.", correct: false, feedback: "After 'their', change adjective 'free' to the noun 'freedom'!" },
+              { text: "The people celebrated their freeness.", correct: false, feedback: "The noun form of 'free' is 'freedom', not 'freeness'." },
+              { text: "The people celebrated their being free.", correct: false, feedback: "Use the abstract noun 'freedom' after 'their'." }
+            ],
+            acceptableAnswers: ["The people celebrated their freedom."]
+          },
+          {
+            id: "u13_q3",
+            given: "The meeting was concluded at 9 p.m.",
+            stem: "The meeting came to a ___________________________.",
+            mcqOptions: [
+              { text: "The meeting came to a conclusion at 9 p.m.", correct: true, feedback: "Well done! Verb 'concluded' turns into the noun 'conclusion'." },
+              { text: "The meeting came to a conclude at 9 p.m.", correct: false, feedback: "After article 'a', use the noun 'conclusion'!" },
+              { text: "The meeting came to a concluded at 9 p.m.", correct: false, feedback: "'Concluded' is a verb/participle; use the noun 'conclusion'." },
+              { text: "The meeting came to a concluding at 9 p.m.", correct: false, feedback: "The standard expression is 'came to a conclusion'." }
+            ],
+            acceptableAnswers: ["The meeting came to a conclusion at 9 p.m."]
+          },
+          {
+            id: "u13_q4",
+            given: "We believe you will do a good job. Your work is always free of flaws.",
+            stem: "___________________________ because of ___________________________.",
+            mcqOptions: [
+              { text: "We believe you will do a good job because of your flawless work.", correct: true, feedback: "Superb! 'Free of flaws' transforms into the adjective 'flawless'." },
+              { text: "We believe you will do a good job because of your work is flawless.", correct: false, feedback: "Avoid 'is' after 'because of'—use the noun phrase 'your flawless work'!" },
+              { text: "We believe you will do a good job because of your flawful work.", correct: false, feedback: "'Free of flaws' means WITHOUT flaws ('flawless'), not 'flawful'!" },
+              { text: "We believe you will do a good job because of your work free of flaws.", correct: false, feedback: "Change 'free of flaws' to 'flawless' before 'work'." }
+            ],
+            acceptableAnswers: ["We believe you will do a good job because of your flawless work."]
+          },
+          {
+            id: "u13_q5",
+            given: "Jane trembled with horror. She had seen a rat in the kitchen.",
+            stem: "Horrified by ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Horrified by the sight of a rat in the kitchen, Jane trembled.", correct: true, feedback: "Masterful! 'Horror' becomes 'Horrified' and 'seen' becomes 'the sight of'." },
+              { text: "Horrified by seeing a rat in the kitchen, Jane trembled with horror.", correct: false, feedback: "Do not repeat 'with horror' at the end when you already started with 'Horrified'!" },
+              { text: "Horrified by the rat in the kitchen, Jane had seen it and trembled.", correct: false, feedback: "Combine smoothly: 'Horrified by the sight of a rat in the kitchen, Jane trembled.'" },
+              { text: "Horrified by she had seen a rat in the kitchen, Jane trembled.", correct: false, feedback: "After preposition 'by', use a noun/gerund phrase ('the sight of a rat' or 'seeing a rat')." }
             ],
             acceptableAnswers: [
-              "Sean's sudden appearance in front of Angela gave her a shock."
+              "Horrified by the sight of a rat in the kitchen, Jane trembled.",
+              "Horrified by seeing a rat in the kitchen, Jane trembled."
             ]
           }
         ]
@@ -821,23 +1559,73 @@
       {
         unitId: 14,
         title: "Unit 14: Participial Phrases",
-        connector: "Present (-ing) / Past (-ed) Participles",
+        connector: "Present (-ing) / Past (-ed/-en) Participles",
         badge: "⛵",
         badgeName: "Phrase Pathfinder",
+        watchIt: "💡 Watch It! Always place a COMMA after an introductory participial phrase, and make sure the person right after the comma is the one doing (or receiving) that action!",
         questions: [
           {
             id: "u14_q1",
             given: "Vindy felt elated. She danced around the room.",
-            prompt: "Feeling elated,",
+            stem: "Feeling elated, ___________________________.",
             mcqOptions: [
-              { text: "Feeling elated, Vindy danced around the room.", correct: true, feedback: "Spot on! The present participle 'Feeling' cleanly opens the descriptive clause." },
-              { text: "Feeling elated, so Vindy danced around the room.", correct: false, feedback: "Do not add 'so'! The participial phrase directly modifies 'Vindy'." },
-              { text: "Felt elated, Vindy danced around the room.", correct: false, feedback: "Active emotion requires the present participle 'Feeling', not 'Felt'." },
-              { text: "Feeling elated, Vindy dances around the room.", correct: false, feedback: "Tense shift error: keep simple past 'danced'." }
+              { text: "Feeling elated, Vindy danced around the room.", correct: true, feedback: "Spot on! 'Vindy' comes right after the comma as the person feeling elated." },
+              { text: "Feeling elated, so Vindy danced around the room.", correct: false, feedback: "Never put 'so' after a participial phrase!" },
+              { text: "Feeling elated, Vindy dances around the room.", correct: false, feedback: "Keep the past tense 'danced'!" },
+              { text: "Feeling elated, she danced around the room.", correct: false, feedback: "Use the proper noun 'Vindy' in the main clause so we know who 'she' is!" }
+            ],
+            acceptableAnswers: ["Feeling elated, Vindy danced around the room."]
+          },
+          {
+            id: "u14_q2",
+            given: "A wave of pain hit Reeve. He moaned and curled up in a ball.",
+            stem: "Hit by ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Hit by a wave of pain, Reeve moaned and curled up in a ball.", correct: true, feedback: "Excellent! Past participle 'Hit by' describes what happened to Reeve." },
+              { text: "Hit by a wave of pain, he moaned and curled up in a ball.", correct: false, feedback: "Replace 'he' with 'Reeve' so the sentence names the subject!" },
+              { text: "Hit by Reeve, a wave of pain moaned and curled up in a ball.", correct: false, feedback: "Dangling modifier! Reeve was hit by a wave of pain, not the other way around." },
+              { text: "Hit by a wave of pain, and Reeve moaned and curled up in a ball.", correct: false, feedback: "Do not put 'and' after the comma!" }
+            ],
+            acceptableAnswers: ["Hit by a wave of pain, Reeve moaned and curled up in a ball."]
+          },
+          {
+            id: "u14_q3",
+            given: "I sang in the shower. Thus, I forgot about all my troubles.",
+            stem: "Singing ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Singing in the shower, I forgot about all my troubles.", correct: true, feedback: "Great job! You dropped 'Thus' and changed 'sang' to 'Singing'." },
+              { text: "Singing in the shower, thus I forgot about all my troubles.", correct: false, feedback: "Drop 'thus' when using a participial phrase!" },
+              { text: "Singing in the shower, all my troubles were forgotten.", correct: false, feedback: "Dangling participle! 'All my troubles' weren't singing in the shower—'I' was!" },
+              { text: "Singing in the shower, I forget about all my troubles.", correct: false, feedback: "Keep the past tense 'forgot'!" }
+            ],
+            acceptableAnswers: ["Singing in the shower, I forgot about all my troubles."]
+          },
+          {
+            id: "u14_q4",
+            given: "The speaker gave an inspiring talk. Alicia applied the principles mentioned.",
+            stem: "Inspired by ___________________________, ___________________________.",
+            mcqOptions: [
+              { text: "Inspired by the speaker's talk, Alicia applied the principles mentioned.", correct: true, feedback: "Superb! 'Alicia' is the one who was 'Inspired by the speaker's talk'." },
+              { text: "Inspired by the speaker's talk, the principles mentioned were applied by Alicia.", correct: false, feedback: "The principles weren't inspired—'Alicia' must come immediately after the comma!" },
+              { text: "Inspired by Alicia, the speaker gave a talk and applied the principles.", correct: false, feedback: "Meaning reversed! Alicia was inspired by the speaker's talk." },
+              { text: "Inspired by the speaker gave a talk, Alicia applied the principles mentioned.", correct: false, feedback: "After 'Inspired by', use a noun phrase ('the speaker's talk'), not 'the speaker gave a talk'." }
             ],
             acceptableAnswers: [
-              "Feeling elated, Vindy danced around the room."
+              "Inspired by the speaker's talk, Alicia applied the principles mentioned.",
+              "Inspired by the talk given by the speaker, Alicia applied the principles mentioned."
             ]
+          },
+          {
+            id: "u14_q5",
+            given: "Leon is a quick thinker. He came up with a solution in five minutes.",
+            stem: "Thinking quickly, ___________________________.",
+            mcqOptions: [
+              { text: "Thinking quickly, Leon came up with a solution in five minutes.", correct: true, feedback: "Spot on! 'Quick thinker' transforms into 'Thinking quickly'." },
+              { text: "Thinking quickly, he came up with a solution in five minutes.", correct: false, feedback: "Make sure you name 'Leon' instead of just 'he'!" },
+              { text: "Thinking quickly, a solution was come up with by Leon in five minutes.", correct: false, feedback: "Put 'Leon' right after the comma as the person thinking quickly!" },
+              { text: "Thinking quickly, Leon comes up with a solution in five minutes.", correct: false, feedback: "Keep the past tense 'came up'!" }
+            ],
+            acceptableAnswers: ["Thinking quickly, Leon came up with a solution in five minutes."]
           }
         ]
       }
@@ -846,10 +1634,10 @@
     // --- LEVEL SCALING ---
     const levels = [
       { minExp: 0, title: "Level 1: Novice" },
-      { minExp: 100, title: "Level 2: Apprentice" },
-      { minExp: 250, title: "Level 3: Scout" },
-      { minExp: 500, title: "Level 4: Commander" },
-      { minExp: 800, title: "Level 5: Grandmaster" }
+      { minExp: 150, title: "Level 2: Apprentice" },
+      { minExp: 400, title: "Level 3: Scout" },
+      { minExp: 800, title: "Level 4: Commander" },
+      { minExp: 1300, title: "Level 5: Grandmaster" }
     ];
 
     function getLevel(exp) {
@@ -859,7 +1647,6 @@
       return levels[0].title;
     }
 
-    // --- UTILITIES: SHUFFLE ---
     function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -877,6 +1664,13 @@
         updateUserUI();
       }
       renderTopicGrid();
+
+      // Enter key support for typing box
+      document.getElementById('typedInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !document.getElementById('checkTypingBtn').disabled) {
+          checkTypedAnswer();
+        }
+      });
     });
 
     function saveName() {
@@ -896,25 +1690,32 @@
       document.getElementById('avatarLetter').innerText = state.name.charAt(0).toUpperCase();
       document.getElementById('currentExp').innerText = state.exp;
       document.getElementById('levelTitle').innerText = getLevel(state.exp);
+      document.getElementById('mistakeCount').innerText = state.mistakes.length;
     }
 
     function isUnitFullyCompleted(unit) {
       return unit.questions.every(q => state.doneQuestions[q.id]);
     }
 
+    function getUnlockedBadgeCount() {
+      return Object.keys(state.badges).filter(id => parseInt(id) <= 14 && state.badges[id]).length;
+    }
+
     function renderTopicGrid() {
       const grid = document.getElementById('unitGrid');
       grid.innerHTML = '';
+
       curriculum.forEach((unit, idx) => {
         const isMastered = !!state.badges[unit.unitId];
         const isCompleted = isUnitFullyCompleted(unit);
+        const doneCount = unit.questions.filter(q => state.doneQuestions[q.id]).length;
 
         const card = document.createElement('div');
         card.className = `unit-card ${isCompleted ? 'unit-completed' : ''}`;
         
         card.onclick = () => {
           if (isCompleted) {
-            alert(`You have already completed ${unit.title}! Great job. Try another unit.`);
+            alert(`You have already completed all 5 questions in ${unit.title}! Try another unit.`);
             return;
           }
           openModeModal(idx);
@@ -923,7 +1724,7 @@
         card.innerHTML = `
           <div class="unit-details">
             <h3>${unit.title}</h3>
-            <p>${unit.connector}</p>
+            <p>${unit.connector} • (${doneCount}/5 done)</p>
           </div>
           <div class="unit-badge-status">
             <div class="badge-icon ${isMastered ? 'badge-unlocked' : ''}" title="${unit.badgeName}">
@@ -934,13 +1735,49 @@
         `;
         grid.appendChild(card);
       });
+
+      // Unit 15: Boss Rush Card
+      const badgesCount = getUnlockedBadgeCount();
+      const bossUnlocked = badgesCount >= 5;
+      const bossMastered = !!state.badges[15];
+      const bossCard = document.createElement('div');
+      bossCard.className = `unit-card boss-card ${!bossUnlocked ? 'unit-locked' : ''}`;
+      bossCard.onclick = () => {
+        if (!bossUnlocked) {
+          alert(`🔒 Locked! Earn at least 5 Unit Badges first (You currently have ${badgesCount}/5).`);
+          return;
+        }
+        openModeModal('boss');
+      };
+      bossCard.innerHTML = `
+        <div class="unit-details">
+          <h3>🔥 Unit 15: Boss Rush (Mixed Revision)</h3>
+          <p>${bossUnlocked ? '10 Randomised Questions • DOUBLE EXP (+20 MCQ / +50 Typing)!' : `🔒 Unlock 5 Unit Badges to challenge (${badgesCount}/5 unlocked)`}</p>
+        </div>
+        <div class="unit-badge-status">
+          <div class="badge-icon ${bossMastered ? 'badge-unlocked' : ''}" style="font-size:32px;">👑</div>
+        </div>
+      `;
+      grid.appendChild(bossCard);
     }
 
-    // --- PRE-TOPIC MODE MODAL ---
-    function openModeModal(unitIdx) {
-      state.selectedUnitIdx = unitIdx;
-      const unit = curriculum[unitIdx];
-      document.getElementById('modalUnitTitle').innerText = unit.title;
+    // --- PRE-TOPIC WATCH IT! + MODE MODAL ---
+    function openModeModal(unitIdxOrBoss) {
+      state.selectedUnitIdx = unitIdxOrBoss;
+      const isBoss = unitIdxOrBoss === 'boss';
+
+      if (isBoss) {
+        document.getElementById('modalUnitTitle').innerText = "🔥 Unit 15: Boss Rush";
+        document.getElementById('watchItTipBox').innerHTML = "<strong>👑 Grandmaster Challenge:</strong> You will face 10 random questions across all 14 units for <strong>Double EXP</strong>! Read every connector prompt carefully.";
+        document.getElementById('mcqExpLabel').innerText = "+20 EXP / Qn";
+        document.getElementById('typeExpLabel').innerText = "+50 EXP / Qn";
+      } else {
+        const unit = curriculum[unitIdxOrBoss];
+        document.getElementById('modalUnitTitle').innerText = unit.title;
+        document.getElementById('watchItTipBox').innerText = unit.watchIt;
+        document.getElementById('mcqExpLabel').innerText = "+10 EXP / Qn";
+        document.getElementById('typeExpLabel').innerText = "+25 EXP / Qn";
+      }
       document.getElementById('modeSelectModal').classList.remove('hidden');
     }
 
@@ -951,21 +1788,36 @@
 
     function confirmMode(chosenMode) {
       state.currentMode = chosenMode;
-      const unitIdx = state.selectedUnitIdx;
+      const target = state.selectedUnitIdx;
       closeModeModal();
-      startUnit(unitIdx);
+      startUnit(target);
     }
 
     // --- GAMEPLAY FLOW ---
-    function startUnit(unitIdx) {
-      state.currentUnitIndex = unitIdx;
+    function startUnit(unitIdxOrBoss) {
       state.currentUnitCorrect = 0;
+      state.pendingUnitExp = 0;
 
-      // Find first uncompleted question
-      const unit = curriculum[unitIdx];
-      let firstUnsolved = unit.questions.findIndex(q => !state.doneQuestions[q.id]);
-      if (firstUnsolved === -1) firstUnsolved = 0;
-      state.currentQuestionIndex = firstUnsolved;
+      if (unitIdxOrBoss === 'boss') {
+        // Build 10 random questions from all 70 questions
+        const allQuestions = curriculum.flatMap(u => u.questions);
+        const random10 = shuffleArray(allQuestions).slice(0, 10);
+        state.currentUnitObj = {
+          unitId: 15,
+          title: "Unit 15: Boss Rush",
+          badge: "👑",
+          badgeName: "Grammar Monarch",
+          isBoss: true,
+          questions: random10
+        };
+        state.currentQuestionIndex = 0;
+      } else {
+        const unit = curriculum[unitIdxOrBoss];
+        state.currentUnitObj = unit;
+        let firstUnsolved = unit.questions.findIndex(q => !state.doneQuestions[q.id]);
+        if (firstUnsolved === -1) firstUnsolved = 0;
+        state.currentQuestionIndex = firstUnsolved;
+      }
 
       document.getElementById('topicScreen').classList.add('hidden');
       document.getElementById('summaryScreen').classList.add('hidden');
@@ -975,35 +1827,32 @@
     }
 
     function loadQuestion() {
-      const unit = curriculum[state.currentUnitIndex];
+      const unit = state.currentUnitObj;
       const q = unit.questions[state.currentQuestionIndex];
       state.typingRetryUsed = false;
 
-      // Header UI
       document.getElementById('questionTopicHeading').innerText = unit.title;
       document.getElementById('questionProgress').innerText = `Question ${state.currentQuestionIndex + 1} of ${unit.questions.length}`;
       const pct = (state.currentQuestionIndex / unit.questions.length) * 100;
       document.getElementById('progressBar').style.width = `${pct}%`;
 
-      // Mode Badge
+      const mult = unit.isBoss ? 2 : 1;
       const modeBadge = document.getElementById('activeModeBadge');
       if (state.currentMode === 'mcq') {
-        modeBadge.innerText = 'Mode A: Multiple Choice (+10 EXP)';
+        modeBadge.innerText = `Mode A: Multiple Choice (+${10 * mult} EXP)`;
         document.getElementById('mcqContainer').classList.remove('hidden');
         document.getElementById('typingContainer').classList.add('hidden');
         renderShuffledMcq(q);
       } else {
-        modeBadge.innerText = 'Mode B: Full Sentence Typing (+25 EXP)';
+        modeBadge.innerText = `Mode B: Full Sentence Typing (+${25 * mult} EXP)`;
         document.getElementById('typingContainer').classList.remove('hidden');
         document.getElementById('mcqContainer').classList.add('hidden');
         setupTypingMode();
       }
 
-      // Stimulus
       document.getElementById('givenSentences').innerText = q.given;
-      document.getElementById('promptConnector').innerText = `Use: ${q.prompt}`;
+      document.getElementById('psleStemPreview').innerText = `📝 Exam Prompt: ${q.stem}`;
 
-      // Reset feedback and controls
       const fb = document.getElementById('feedbackBanner');
       fb.style.display = 'none';
       fb.className = 'feedback-banner';
@@ -1014,8 +1863,6 @@
     function renderShuffledMcq(q) {
       const container = document.getElementById('mcqContainer');
       container.innerHTML = '';
-      
-      // Randomise options so correct is never always first
       const randomizedOptions = shuffleArray(q.mcqOptions);
 
       randomizedOptions.forEach((opt) => {
@@ -1028,33 +1875,36 @@
     }
 
     function selectMcqOption(option, btnElement) {
-      const q = curriculum[state.currentUnitIndex].questions[state.currentQuestionIndex];
+      const unit = state.currentUnitObj;
+      const q = unit.questions[state.currentQuestionIndex];
+      const mult = unit.isBoss ? 2 : 1;
 
-      // Lock all options
       document.querySelectorAll('.mcq-btn').forEach(b => b.disabled = true);
 
       const fb = document.getElementById('feedbackBanner');
       fb.style.display = 'block';
 
-      // Permanently flag question as done
-      state.doneQuestions[q.id] = true;
-      localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
+      if (!unit.isBoss) {
+        state.doneQuestions[q.id] = true;
+        localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
+      }
 
       if (option.correct) {
         btnElement.classList.add('correct');
         fb.className = 'feedback-banner feedback-success';
-        fb.innerHTML = `<strong>🌟 Brilliant!</strong> ${option.feedback}`;
-        awardExp(10, 'MCQ Mode');
+        fb.innerHTML = `<strong>🌟 Brilliant! (+${10 * mult} EXP)</strong> ${option.feedback}`;
+        queueExp(10 * mult);
         state.currentUnitCorrect++;
       } else {
         btnElement.classList.add('incorrect');
         fb.className = 'feedback-banner feedback-error';
-        fb.innerHTML = `<strong>⚠️ Check Carefully:</strong> ${option.feedback}`;
+        fb.innerHTML = `<strong>⚠️ Trap Alert:</strong> ${option.feedback}<br><em>Correct Answer:</em> ${q.acceptableAnswers[0]}`;
+        logMistake(q.given, option.text, q.acceptableAnswers[0]);
       }
       document.getElementById('nextBtn').classList.remove('hidden');
     }
 
-    // --- MODE B: FORGIVING TYPING ENGINE ---
+    // --- MODE B: SMART TYPING ENGINE WITH CONTRACTION & WORD-DIFF CHECK ---
     function setupTypingMode() {
       const input = document.getElementById('typedInput');
       input.value = '';
@@ -1066,15 +1916,40 @@
     function normaliseSentence(str) {
       return str
         .trim()
-        .replace(/[""]/g, '"')
-        .replace(/['']/g, "'")
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'")
         .replace(/\s+/g, ' ');
+    }
+
+    function hasContraction(str) {
+      return /\b(don't|doesn't|didn't|won't|wouldn't|can't|couldn't|shouldn't|isn't|aren't|wasn't|weren't|hasn't|haven't|hadn't|I'm|you're|we're|they're|he's|she's|it's|I've|I'd|I'll)\b/i.test(str);
+    }
+
+    function generateWordDiffHtml(userStr, targetStr) {
+      const cleanWord = w => w.replace(/[.,?!]/g, '').toLowerCase();
+      const targetWords = targetStr.split(' ').map(cleanWord);
+      const userWords = userStr.split(' ');
+
+      const highlighted = userWords.map((w, idx) => {
+        const cleaned = cleanWord(w);
+        if (targetWords[idx] === cleaned) {
+          return `<span class="word-ok">${w}</span>`;
+        } else if (targetWords.includes(cleaned)) {
+          return `<span class="word-ok">${w}</span>`;
+        } else {
+          return `<span class="word-err">${w}</span>`;
+        }
+      });
+
+      return `<div class="diff-box"><strong>Spot the highlighted slip:</strong><br>${highlighted.join(' ')}</div>`;
     }
 
     function checkTypedAnswer() {
       const input = document.getElementById('typedInput');
       const userText = normaliseSentence(input.value);
-      const q = curriculum[state.currentUnitIndex].questions[state.currentQuestionIndex];
+      const unit = state.currentUnitObj;
+      const q = unit.questions[state.currentQuestionIndex];
+      const mult = unit.isBoss ? 2 : 1;
       const fb = document.getElementById('feedbackBanner');
       fb.style.display = 'block';
 
@@ -1084,86 +1959,142 @@
         return;
       }
 
-      // Check against all acceptable answers
-      const isExactMatch = q.acceptableAnswers.some(ans => normaliseSentence(ans).toLowerCase() === userText.toLowerCase());
+      // 1. Free Contraction Check (Does not consume retry)
+      if (hasContraction(userText)) {
+        fb.className = 'feedback-banner feedback-scaffold';
+        fb.innerHTML = `<strong>✋ PSLE Tip:</strong> Avoid contractions (like <em>don't, didn't, wasn't</em>) in Synthesis! Write the full words (e.g., <em>do not, did not</em>) and click Submit again.`;
+        return;
+      }
+
+      const stripPunct = s => s.replace(/[.?!]$/, '').toLowerCase();
+      const isWordsMatch = q.acceptableAnswers.some(ans => stripPunct(normaliseSentence(ans)) === stripPunct(userText));
       const endsWithPunctuation = /[.?!]$/.test(userText);
       const startsWithCapital = /^[A-Z]/.test(userText);
 
-      if (isExactMatch && endsWithPunctuation && startsWithCapital) {
-        // Mark question as done
-        state.doneQuestions[q.id] = true;
-        localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
-
+      // 2. Perfect Match
+      if (isWordsMatch && endsWithPunctuation && startsWithCapital) {
+        if (!unit.isBoss) {
+          state.doneQuestions[q.id] = true;
+          localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
+        }
+        const pts = state.typingRetryUsed ? (20 * mult) : (25 * mult);
         input.disabled = true;
         document.getElementById('checkTypingBtn').disabled = true;
         fb.className = 'feedback-banner feedback-success';
-        fb.innerHTML = `<strong>🌟 Masterful Work! (+25 EXP)</strong> Perfectly synthesized and punctuated.`;
-        awardExp(25, 'Typing Mode');
+        fb.innerHTML = `<strong>🌟 Masterful Work! (+${pts} EXP)</strong> Perfectly synthesized and punctuated.`;
+        queueExp(pts);
         state.currentUnitCorrect++;
         document.getElementById('nextBtn').classList.remove('hidden');
-      } 
-      else if (isExactMatch && (!endsWithPunctuation || !startsWithCapital)) {
-        // Scaffolding: Minor mechanical oversight (1 free retry)
+        return;
+      }
+
+      // 3. Words Match, Missing Capital or Full Stop
+      if (isWordsMatch && (!endsWithPunctuation || !startsWithCapital)) {
         if (!state.typingRetryUsed) {
           state.typingRetryUsed = true;
           fb.className = 'feedback-banner feedback-scaffold';
-          fb.innerHTML = `<strong>🔍 Almost there!</strong> Your grammar structure is spot on, but check your capital letter or final full stop. Fix it and try once more!`;
+          fb.innerHTML = `<strong>🔍 Almost perfect!</strong> Your grammar is 100% right, but check your <strong>starting capital letter</strong> or <strong>ending full stop</strong>. Fix it and submit!`;
+          return;
         } else {
-          // Accepted after retry
-          state.doneQuestions[q.id] = true;
-          localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
-
+          if (!unit.isBoss) {
+            state.doneQuestions[q.id] = true;
+            localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
+          }
           input.disabled = true;
           document.getElementById('checkTypingBtn').disabled = true;
           fb.className = 'feedback-banner feedback-success';
-          fb.innerHTML = `<strong>Accepted! (+20 EXP)</strong> Good effort! Remember your full stop under exam conditions.`;
-          awardExp(20, 'Typing Mode');
+          fb.innerHTML = `<strong>Accepted! (+${20 * mult} EXP)</strong> Always check your capital letters and full stops in the exam!`;
+          queueExp(20 * mult);
           state.currentUnitCorrect++;
           document.getElementById('nextBtn').classList.remove('hidden');
+          return;
         }
-      } 
-      else {
-        // Incorrect
+      }
+
+      // 4. Grammar / Spelling Mismatch -> Trigger Word-Diff Highlighter on First Try
+      if (!state.typingRetryUsed) {
+        state.typingRetryUsed = true;
+        const diffHtml = generateWordDiffHtml(userText, q.acceptableAnswers[0]);
+        fb.className = 'feedback-banner feedback-scaffold';
+        fb.innerHTML = `<strong>🛠️ 1 Retry Remaining!</strong> Check the red underlined words below (watch out for verb tenses or extra words): ${diffHtml}`;
+        return;
+      }
+
+      // 5. Second Attempt Failed -> Lock & Log Mistake
+      if (!unit.isBoss) {
         state.doneQuestions[q.id] = true;
         localStorage.setItem('p5_done_q', JSON.stringify(state.doneQuestions));
-
-        fb.className = 'feedback-banner feedback-error';
-        fb.innerHTML = `<strong>Not quite right:</strong> Check connectors and verbs carefully.<br><em>Model Answer:</em> ${q.acceptableAnswers[0]}`;
-        input.disabled = true;
-        document.getElementById('checkTypingBtn').disabled = true;
-        document.getElementById('nextBtn').classList.remove('hidden');
       }
+      fb.className = 'feedback-banner feedback-error';
+      fb.innerHTML = `<strong>Not quite right:</strong> Compare your answer carefully with the model answer below.<br><em>Model Answer:</em> <strong>${q.acceptableAnswers[0]}</strong>`;
+      logMistake(q.given, userText, q.acceptableAnswers[0]);
+      input.disabled = true;
+      document.getElementById('checkTypingBtn').disabled = true;
+      document.getElementById('nextBtn').classList.remove('hidden');
     }
 
-    // --- EXP & BACKGROUND GOOGLE SHEET SYNC ---
-    function awardExp(points, modeStr) {
+    // --- MISTAKE LOGGING ---
+    function logMistake(given, studentAns, modelAns) {
+      state.mistakes.unshift({ given, studentAns, modelAns });
+      if (state.mistakes.length > 30) state.mistakes.pop();
+      localStorage.setItem('p5_mistakes', JSON.stringify(state.mistakes));
+      updateUserUI();
+    }
+
+    function openMistakesModal() {
+      const container = document.getElementById('mistakesListContainer');
+      if (state.mistakes.length === 0) {
+        container.innerHTML = `<p style="padding: 20px; color: var(--text-muted);">🎉 Spotless record! You have no logged mistakes yet.</p>`;
+      } else {
+        container.innerHTML = state.mistakes.map((m, i) => `
+          <div class="mistake-item">
+            <div style="font-weight:700; color:var(--text); margin-bottom:4px;">${i + 1}. ${m.given}</div>
+            <div style="color:var(--danger);">❌ Your answer: ${m.studentAns}</div>
+            <div style="color:#065F46; font-weight:700;">✅ Model answer: ${m.modelAns}</div>
+          </div>
+        `).join('');
+      }
+      document.getElementById('mistakesModal').classList.remove('hidden');
+    }
+
+    function closeMistakesModal() {
+      document.getElementById('mistakesModal').classList.add('hidden');
+    }
+
+    // --- 1-REQUEST-PER-UNIT SYNC (ANTI-LAG) ---
+    function queueExp(points) {
       state.exp += points;
+      state.pendingUnitExp += points;
       localStorage.setItem('p5_exp', state.exp);
       updateUserUI();
+    }
 
-      if (state.apiUrl) {
-        const payload = JSON.stringify({
-          name: state.name,
-          unit: curriculum[state.currentUnitIndex].title,
-          mode: modeStr,
-          exp: points
-        });
+    function flushUnitExpToSheet() {
+      if (state.pendingUnitExp <= 0 || !state.apiUrl) return;
 
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon(state.apiUrl, payload);
-        } else {
-          fetch(state.apiUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: payload
-          }).catch(() => {});
-        }
+      const payload = JSON.stringify({
+        name: state.name,
+        unit: state.currentUnitObj ? state.currentUnitObj.title : 'Unit Practice',
+        mode: state.currentMode === 'mcq' ? 'MCQ Mode' : 'Typing Mode',
+        exp: state.pendingUnitExp
+      });
+
+      state.pendingUnitExp = 0;
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(state.apiUrl, payload);
+      } else {
+        fetch(state.apiUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        }).catch(() => {});
       }
     }
 
     function nextQuestion() {
-      const unit = curriculum[state.currentUnitIndex];
+      const unit = state.currentUnitObj;
       if (state.currentQuestionIndex + 1 < unit.questions.length) {
         state.currentQuestionIndex++;
         loadQuestion();
@@ -1173,7 +2104,9 @@
     }
 
     function finishUnit() {
-      const unit = curriculum[state.currentUnitIndex];
+      flushUnitExpToSheet();
+
+      const unit = state.currentUnitObj;
       const accuracy = (state.currentUnitCorrect / unit.questions.length);
       const isMastered = accuracy >= 0.8;
 
@@ -1188,14 +2121,19 @@
         document.getElementById('summaryHeading').innerText = `Badge Unlocked: ${unit.badgeName}!`;
       } else {
         document.getElementById('summaryBadgeDisplay').innerText = "📚";
-        document.getElementById('summaryHeading').innerText = "Good Practice Run!";
+        document.getElementById('summaryHeading').innerText = "Unit Completed!";
       }
 
       document.getElementById('summaryScore').innerText = 
         `You scored ${state.currentUnitCorrect} / ${unit.questions.length} (${Math.round(accuracy * 100)}%).` +
-        (isMastered ? " Mastery demonstrated!" : " Score 80% or more to earn the badge.");
+        (isMastered ? " Mastery demonstrated!" : " You need 80% (4/5) to unlock the unit badge.");
 
       renderTopicGrid();
+    }
+
+    function quitUnitEarly() {
+      flushUnitExpToSheet();
+      backToTopics();
     }
 
     function backToTopics() {
@@ -1205,14 +2143,36 @@
       renderTopicGrid();
     }
 
-    function configureApiUrl() {
-      const current = state.apiUrl || '';
-      const input = prompt("https://script.google.com/macros/s/AKfycbwHZD5Lg8uOMY2d5Z0eusxuzBmp8LdZ8s2eLBDOYfi7Tz9e7YX12AD-OAgKe8KJGHk6/exec", current);
-      if (input !== null) {
-        state.apiUrl = input.trim();
-        localStorage.setItem('p5_api_url', state.apiUrl);
-        alert("Google Sheet API connected successfully!");
+    // --- HIDDEN TEACHER MENU (PASSCODE 1998) ---
+    function promptTeacherPasscode() {
+      const pin = prompt("🔒 Enter Teacher Passcode:");
+      if (pin === "1998") {
+        document.getElementById('apiUrlInput').value = state.apiUrl;
+        document.getElementById('teacherModal').classList.remove('hidden');
+      } else if (pin !== null) {
+        alert("Incorrect passcode.");
       }
+    }
+
+    function saveTeacherApi() {
+      const val = document.getElementById('apiUrlInput').value.trim();
+      state.apiUrl = val;
+      localStorage.setItem('p5_api_url', val);
+      alert("✅ Google Sheet API URL saved!");
+      closeTeacherModal();
+    }
+
+    function resetStudentDevice() {
+      if (confirm("⚠️ Are you sure you want to wipe all student progress, EXP, badges, and name on this device?")) {
+        const savedApi = state.apiUrl;
+        localStorage.clear();
+        if (savedApi) localStorage.setItem('p5_api_url', savedApi);
+        location.reload();
+      }
+    }
+
+    function closeTeacherModal() {
+      document.getElementById('teacherModal').classList.add('hidden');
     }
   </script>
 </body>
